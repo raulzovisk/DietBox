@@ -5,9 +5,10 @@ import AddMealModal from '@/Components/AddMealModal';
 import AddFoodToMealModal from '@/Components/AddFoodToMealModal';
 import { calculateCalories } from '@/Utils/calorieCalculator';
 import EditFoodModal from '@/Components/EditFoodModal';
-import { showSuccess } from '@/Utils/toast';
-import { ArrowLeft, Flame, Users, X, Plus } from 'lucide-react';
+import { showSuccess, showWarning } from '@/Utils/toast';
+import { ArrowLeft, Flame, Users, X, Plus, Trash2, UserX } from 'lucide-react';
 import { useState } from 'react';
+import axios from 'axios';
 
 export default function Show({ diet, auth, users, foods, measures }) {
     const [selectedDay, setSelectedDay] = useState(0);
@@ -19,6 +20,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
     const [selectedMealForFood, setSelectedMealForFood] = useState(null);
     const [editingMealFood, setEditingMealFood] = useState(null);
     const [isEditFoodModalOpen, setIsEditFoodModalOpen] = useState(false);
+    const [removingAssignmentId, setRemovingAssignmentId] = useState(null);
 
     const { data, setData, post, processing, errors } = useForm({
         user_id: '',
@@ -92,6 +94,42 @@ export default function Show({ diet, auth, users, foods, measures }) {
         });
     };
 
+    const handleUnassignUser = async (assignmentId, userName) => {
+        if (!confirm(`Tem certeza que deseja remover ${userName} desta dieta?`)) {
+            return;
+        }
+
+        setRemovingAssignmentId(assignmentId);
+        showWarning('Removendo usuário...', 0);
+
+        try {
+            const response = await axios.delete(`/diets/${diet.id}/unassign/${assignmentId}`);
+
+            console.log('Resposta:', response);
+
+            setRemovingAssignmentId(null);
+            showSuccess(`${userName} removido com sucesso`, 3000);
+
+            setTimeout(() => {
+                window.location.reload();
+            }, 800);
+
+        } catch (err) {
+            console.error('Erro ao remover:', err);
+            setRemovingAssignmentId(null);
+
+            if (err.response?.status === 200) {
+                showSuccess(`${userName} removido com sucesso`, 3000);
+                setTimeout(() => {
+                    window.location.reload();
+                }, 800);
+            } else {
+                showError(`Erro ao remover usuário: ${err.response?.status || err.message}`, 5000);
+            }
+        }
+    };
+
+
     return (
         <AuthenticatedLayout
             header={
@@ -103,6 +141,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                         >
                             <ArrowLeft className="h-5 w-5 text-gray-600" />
                         </Link>
+
                         <div>
                             <h2 className="text-xl font-semibold leading-tight text-gray-800">
                                 {diet.name}
@@ -122,12 +161,13 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                 Atribuir Usuário
                             </button>
                             <Link
-                                href={`/diets/${diet.id}/edit`}
+                                href={`/diets/${diet.id}/edit?from=show`}
                                 className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500 transition-colors"
                             >
                                 Editar
                             </Link>
-                        </div>
+
+                        </div>  
                     )}
                 </div>
             }
@@ -168,20 +208,44 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                     </p>
                                 </div>
                                 <div>
-                                    <h3 className="text-sm font-medium text-gray-500">
+                                    <h3 className="text-sm font-medium text-gray-500 mb-2">
                                         Usuários Atribuídos
                                     </h3>
                                     <div className="mt-1">
                                         {diet.assignments && diet.assignments.length > 0 ? (
                                             <div className="space-y-2">
                                                 {diet.assignments.map((assignment) => (
-                                                    <p key={assignment.id} className="text-sm text-gray-800">
-                                                        ✓ {assignment.user.name} ({assignment.user.email})
-                                                    </p>
+                                                    <div
+                                                        key={assignment.id}
+                                                        className="flex items-center justify-between rounded-lg bg-blue-50 border border-blue-200 px-3 py-2 group hover:bg-blue-100 transition-colors"
+                                                    >
+                                                        <div>
+                                                            <p className="text-sm font-medium text-gray-800">
+                                                                {assignment.user.name}
+                                                            </p>
+                                                            <p className="text-xs text-gray-600">
+                                                                {assignment.user.email}
+                                                            </p>
+                                                        </div>
+                                                        {canEdit && (
+                                                            <button
+                                                                onClick={() => handleUnassignUser(assignment.id, assignment.user.name)}
+                                                                disabled={removingAssignmentId === assignment.id}
+                                                                className="opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-900 transition-all p-1 rounded hover:bg-red-50 disabled:opacity-50"
+                                                                title="Remover usuário"
+                                                            >
+                                                                {removingAssignmentId === assignment.id ? (
+                                                                    <span className="inline-block animate-spin">⏳</span>
+                                                                ) : (
+                                                                    <UserX className="h-4 w-4" />
+                                                                )}
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 ))}
                                             </div>
                                         ) : (
-                                            <p className="text-gray-600">Nenhum usuário atribuído ainda</p>
+                                            <p className="text-gray-600 text-sm">Nenhum usuário atribuído ainda</p>
                                         )}
                                     </div>
                                 </div>
@@ -200,11 +264,10 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                     <button
                                         key={index}
                                         onClick={() => setSelectedDay(index)}
-                                        className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                                            selectedDay === index
-                                                ? 'bg-amber-600 text-white'
-                                                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                        }`}
+                                        className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${selectedDay === index
+                                            ? 'bg-amber-600 text-white'
+                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                            }`}
                                     >
                                         {day.substring(0, 3)}
                                     </button>
@@ -434,7 +497,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
             {/* Modal de Atribuição de Usuário */}
             {isAssignModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
                         <div className="mb-4 flex items-center justify-between border-b pb-4">
                             <h3 className="text-lg font-semibold text-gray-800">
                                 Atribuir Usuário à Dieta
@@ -475,14 +538,35 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                     )}
                                 </select>
                                 {errors.user_id && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.user_id}</p>
+                                    <div className="mt-2 rounded-lg bg-red-50 border border-red-200 p-3">
+                                        <p className="text-sm text-red-600">{errors.user_id}</p>
+                                    </div>
+                                )}
+                            </div>
+
+                            {/* Status da Dieta */}
+                            <div className={`mb-4 rounded-lg p-3 border ${diet.is_active
+                                ? 'bg-green-50 border-green-200'
+                                : 'bg-gray-50 border-gray-200'
+                                }`}>
+                                <p className="text-xs font-medium text-gray-700 mb-1">Status desta dieta:</p>
+                                <p className={`text-sm font-semibold ${diet.is_active ? 'text-green-700' : 'text-gray-600'
+                                    }`}>
+                                    {diet.is_active ? '✅ Ativa (usuário verá no app)' : '⚪ Inativa (usuário não verá)'}
+                                </p>
+                                {diet.is_active && (
+                                    <p className="text-xs text-green-600 mt-1">
+                                        ⚠️ Usuários só podem ter 1 dieta ativa por vez
+                                    </p>
                                 )}
                             </div>
 
                             {/* Usuários já atribuídos */}
                             {diet.assignments && diet.assignments.length > 0 && (
                                 <div className="mb-4 rounded-lg bg-blue-50 p-3 border border-blue-200">
-                                    <p className="text-xs font-medium text-blue-700 mb-2">Usuários já atribuídos:</p>
+                                    <p className="text-xs font-medium text-blue-700 mb-2">
+                                        Usuários atribuídos a esta dieta ({diet.assignments.length}):
+                                    </p>
                                     <div className="space-y-1">
                                         {diet.assignments.map((assignment) => (
                                             <p key={assignment.id} className="text-xs text-blue-600">
@@ -513,6 +597,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                     </div>
                 </div>
             )}
+
         </AuthenticatedLayout>
     );
 }

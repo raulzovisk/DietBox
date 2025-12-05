@@ -83,7 +83,6 @@ export default function EditFoodModal({ mealFood, foods, measures, isOpen, onClo
             if (alt.id && !alt.id.toString().startsWith('temp-')) {
                 showWarning('Deletando alternativa...', 0);
 
-                // ✅ URL CORRETA para deletar alternativa
                 const url = `/food-alternatives/${alt.id}`;
                 console.log('Deletando alternativa em:', url);
 
@@ -117,7 +116,6 @@ export default function EditFoodModal({ mealFood, foods, measures, isOpen, onClo
         showInfo('Salvando alterações...', 0);
 
         try {
-            // ✅ USAR PATCH AO INVÉS DE PUT
             await new Promise((resolve, reject) => {
                 patch(`/meal-foods/${mealFood.id}`, {
                     onSuccess: resolve,
@@ -140,7 +138,6 @@ export default function EditFoodModal({ mealFood, foods, measures, isOpen, onClo
                         notes: alt.notes,
                     };
 
-                    // ✅ URL CORRETA para adicionar alternativa
                     const url = `/meal-foods/${mealFood.id}/alternatives`;
                     console.log('Salvando alternativa em:', url);
 
@@ -176,26 +173,24 @@ export default function EditFoodModal({ mealFood, foods, measures, isOpen, onClo
         showWarning('Deletando alimento...', 0);
 
         try {
-            // ✅ URL CORRETA para deletar alimento
-            const url = `/meal-foods/${mealFood.id}`;
-            console.log('Deletando alimento em:', url);
-
-            await axios.delete(url);
-
-            setIsDeleting(false);
-            reset();
-            onClose();
-            showSuccess('Alimento deletado com sucesso', 3000);
-
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
-
+            await axios.delete(`/meal-foods/${mealFood.id}`);
         } catch (err) {
-            console.error('Erro ao deletar alimento:', err);
-            setIsDeleting(false);
-            showError(`Erro ao deletar alimento: ${err.response?.status || err.message}`, 5000);
+            if (!err.response || err.response.status < 200 || err.response.status >= 300) {
+                console.error('Erro:', err);
+                setIsDeleting(false);
+                showError('Erro ao deletar alimento', 5000);
+                return;
+            }
         }
+
+        setIsDeleting(false);
+        showSuccess('Alimento deletado com sucesso', 3000);
+        reset();
+        onClose();
+
+        setTimeout(() => {
+            window.location.reload();
+        }, 800);
     };
 
     if (!isOpen || !mealFood) return null;
@@ -335,8 +330,8 @@ export default function EditFoodModal({ mealFood, foods, measures, isOpen, onClo
                                     <div
                                         key={alt.id || index}
                                         className={`rounded-lg p-3 border flex items-center justify-between ${alt.id?.toString().startsWith('temp-')
-                                                ? 'bg-yellow-50 border-yellow-200'
-                                                : 'bg-blue-50 border-blue-200'
+                                            ? 'bg-yellow-50 border-yellow-200'
+                                            : 'bg-blue-50 border-blue-200'
                                             }`}
                                     >
                                         <div>

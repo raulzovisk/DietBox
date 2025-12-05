@@ -55,6 +55,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::middleware('role:nutritionist,admin')->group(function () {
         Route::resource('diets', DietController::class)->except(['destroy']);
         Route::post('/diets/{diet}/assign', [DietController::class, 'assignUser'])->name('diets.assign');
+        Route::delete('/diets/{diet}/unassign/{assignment}', [DietController::class, 'unassignUser'])->name('diets.unassign');
+         Route::patch('/diets/{diet}/toggle-status', [DietController::class, 'toggleStatus'])->name('diets.toggle-status');
 
         // Refeições diárias
         Route::prefix('diets/{diet}/meals')->name('daily-meals.')->group(function () {

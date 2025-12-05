@@ -66,6 +66,11 @@ class MealFoodController extends Controller
 
         $mealFood->delete();
 
+        // Retornar JSON para requisições AJAX
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Alimento removido com sucesso'], 200);
+        }
+
         return back()->with('success', 'Alimento removido!');
     }
 
@@ -81,6 +86,11 @@ class MealFoodController extends Controller
         ]);
 
         $mealFood->alternatives()->create($validated);
+
+        // Retornar JSON para requisições AJAX
+        if (request()->expectsJson()) {
+            return response()->json(['message' => 'Alternativa adicionada com sucesso'], 200);
+        }
 
         return back()->with('success', 'Alternativa adicionada!');
     }
