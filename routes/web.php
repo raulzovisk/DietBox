@@ -39,11 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Notificações
-    Route::prefix('notifications')->name('notifications.')->group(function () {
-        Route::get('/', [NotificationController::class, 'index'])->name('index');
-        Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
-        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-    });
+   Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+    Route::get('/', [NotificationController::class, 'index'])->name('index');
+    Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+    Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy'); // ✅ CORRIGIDO
+});
+
 
     Route::delete('/meal-foods/{mealFood}', [MealFoodController::class, 'destroy'])->name('meal-foods.destroy');
     Route::patch('/meal-foods/{mealFood}', [MealFoodController::class, 'update'])->name('meal-foods.update');
@@ -56,7 +58,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::resource('diets', DietController::class)->except(['destroy']);
         Route::post('/diets/{diet}/assign', [DietController::class, 'assignUser'])->name('diets.assign');
         Route::delete('/diets/{diet}/unassign/{assignment}', [DietController::class, 'unassignUser'])->name('diets.unassign');
-         Route::patch('/diets/{diet}/toggle-status', [DietController::class, 'toggleStatus'])->name('diets.toggle-status');
+        Route::patch('/diets/{diet}/toggle-status', [DietController::class, 'toggleStatus'])->name('diets.toggle-status');
 
         // Refeições diárias
         Route::prefix('diets/{diet}/meals')->name('daily-meals.')->group(function () {

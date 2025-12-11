@@ -125,7 +125,10 @@ export default function Dashboard({ auth }) {
                             </div>
                         </Link>
 
-                        <div className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-vivid-tangerine-500/50 transition-all cursor-pointer">
+                        <Link
+                            href={route('notifications.index')}
+                            className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-vivid-tangerine-500/50 transition-all cursor-pointer"
+                        >
                             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-vivid-tangerine-500/10 text-vivid-tangerine-500">
                                 <Users className="h-6 w-6" />
                             </div>
@@ -133,9 +136,12 @@ export default function Dashboard({ auth }) {
                                 <h3 className="font-semibold text-slate-800">Usuários</h3>
                                 <p className="text-sm text-slate-500">Gerenciar usuários</p>
                             </div>
-                        </div>
+                        </Link>
 
-                        <div className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-vivid-tangerine-500/50 transition-all cursor-pointer">
+                       <Link
+                            href={route('notifications.index')}
+                            className="flex items-center gap-4 rounded-lg bg-white p-6 shadow-sm border border-slate-200 hover:shadow-md hover:border-vivid-tangerine-500/50 transition-all cursor-pointer"
+                        >
                             <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-vivid-tangerine-500/10 text-vivid-tangerine-500">
                                 <ClipboardList className="h-6 w-6" />
                             </div>
@@ -143,7 +149,7 @@ export default function Dashboard({ auth }) {
                                 <h3 className="font-semibold text-slate-800">Notificações</h3>
                                 <p className="text-sm text-slate-500">Ver notificações</p>
                             </div>
-                        </div>
+                        </Link>
                     </div>
                 )}
 

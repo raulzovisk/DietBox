@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Helpers\NotificationHelper;
 use App\Models\Diet;
 use App\Models\User;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
@@ -11,6 +12,7 @@ use Inertia\Inertia;
 class DietController extends Controller
 {
     use AuthorizesRequests;
+
     public function index()
     {
         $user = auth()->user();
@@ -29,8 +31,6 @@ class DietController extends Controller
             'diets' => $diets,
         ]);
     }
-
-
 
     public function create()
     {
@@ -69,10 +69,10 @@ class DietController extends Controller
             'assignments.user',
         ]);
 
-        //  Buscar usuários comuns (role_id = 1)
+        // Buscar usuários comuns (role_id = 1)
         $users = User::where('role_id', 1)->get();
 
-        //  Buscar todos os alimentos e medidas
+        // Buscar todos os alimentos e medidas
         $foods = \App\Models\Food::orderBy('name')->get();
         $measures = \App\Models\Measure::orderBy('name')->get();
 
@@ -110,7 +110,18 @@ class DietController extends Controller
 
         $diet->update($validated);
 
-        // ✅ Verificar parâmetro 'from' na query string
+        // ✅ NOTIFICAÇÃO: Notificar usuários vinculados se a dieta estiver ativa
+        if ($diet->is_active) {
+            foreach ($diet->assignments as $assignment) {
+                NotificationHelper::dietUpdated(
+                    $assignment->user,
+                    $diet->id,
+                    $diet->name
+                );
+            }
+        }
+
+        // Verificar parâmetro 'from' na query string
         $from = $request->query('from');
 
         if ($from === 'show') {
@@ -119,7 +130,6 @@ class DietController extends Controller
 
         return redirect()->route('diets.index')->with('success', 'Dieta atualizada com sucesso!');
     }
-
 
     public function assignUser(Request $request, Diet $diet)
     {
@@ -170,9 +180,11 @@ class DietController extends Controller
             'assigned_date' => now(),
         ]);
 
+        // ✅ NOTIFICAÇÃO: Usuário foi vinculado à dieta ativa
+        NotificationHelper::dietAssigned($user, $diet->id, $diet->name);
+
         return back()->with('success', "✅ {$user->name} atribuído com sucesso!");
     }
-
 
     public function unassignUser(Diet $diet, $assignmentId)
     {
@@ -180,6 +192,14 @@ class DietController extends Controller
 
         $assignment = $diet->assignments()->findOrFail($assignmentId);
         $userName = $assignment->user->name;
+        $user = $assignment->user;
+
+        NotificationHelper::create(
+            $user,
+            'diet_removed',
+            "Você foi removido da dieta: {$diet->name}",
+            ['diet_id' => $diet->id]
+        );
 
         $assignment->delete();
 
@@ -195,10 +215,32 @@ class DietController extends Controller
 
     public function toggleStatus(Diet $diet)
     {
+        $wasActive = $diet->is_active;
         $diet->update([
             'is_active' => !$diet->is_active
         ]);
 
-        return back()->with('success', 'Status da dieta atualizado com sucesso!');
+        foreach ($diet->assignments as $assignment) {
+            if ($diet->is_active) {
+                // Dieta foi ATIVADA
+                NotificationHelper::create(
+                    $assignment->user,
+                    'diet_activated',
+                    "A dieta '{$diet->name}' foi ativada e agora está disponível para você!",
+                    ['diet_id' => $diet->id]
+                );
+            } else {
+                // Dieta foi DESATIVADA
+                NotificationHelper::create(
+                    $assignment->user,
+                    'diet_deactivated',
+                    "A dieta '{$diet->name}' foi desativada temporariamente.",
+                    ['diet_id' => $diet->id]
+                );
+            }
+        }
+
+        $status = $diet->is_active ? 'ativada' : 'desativada';
+        return back()->with('success', "Dieta {$status} com sucesso!");
     }
 }

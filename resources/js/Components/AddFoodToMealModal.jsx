@@ -2,6 +2,13 @@ import { useForm } from '@inertiajs/react';
 import { X } from 'lucide-react';
 
 export default function AddFoodToMealModal({ dailyMealId, foods, measures, isOpen, onClose }) {
+    if (!isOpen) return null;
+
+    if (!dailyMealId) {
+        console.error('❌ ERRO: dailyMealId não foi fornecido!');
+        return null;
+    }
+
     const { data, setData, post, processing, errors, reset } = useForm({
         food_id: '',
         quantity: '',
@@ -11,6 +18,9 @@ export default function AddFoodToMealModal({ dailyMealId, foods, measures, isOpe
 
     const handleSubmit = (e) => {
         e.preventDefault();
+
+        console.log('📤 Enviando para:', `/daily-meals/${dailyMealId}/foods`);
+
         post(`/daily-meals/${dailyMealId}/foods`, {
             onSuccess: () => {
                 reset();

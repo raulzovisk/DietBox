@@ -26,6 +26,12 @@ class HandleInertiaRequests extends Middleware
                     'created_at' => $request->user()->created_at,
                 ] : null,
             ],
+            'flash' => [
+                'success' => fn () => $request->session()->get('success'),
+                'error' => fn () => $request->session()->get('error'),
+                'warning' => fn () => $request->session()->get('warning'),
+                'info' => fn () => $request->session()->get('info'),
+            ],
             'unreadNotifications' => $request->user() 
                 ? $request->user()->notifications()->where('is_read', false)->count() 
                 : 0,

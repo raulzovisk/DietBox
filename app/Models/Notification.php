@@ -19,17 +19,30 @@ class Notification extends Model
         'read_at',
     ];
 
-    protected function casts(): array
-    {
-        return [
-            'data' => 'array',
-            'is_read' => 'boolean',
-            'read_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'read_at' => 'datetime',
+        'created_at' => 'datetime',
+    ];
 
-    public function user(): BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function scopeUnread($query)
+    {
+        return $query->where('is_read', false);
+    }
+
+    public function scopeRead($query)
+    {
+        return $query->where('is_read', true);
+    }
+
+    public function scopeRecent($query, $days = 7)
+    {
+        return $query->where('created_at', '>=', now()->subDays($days));
     }
 }

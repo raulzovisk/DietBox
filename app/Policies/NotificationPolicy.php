@@ -9,6 +9,11 @@ class NotificationPolicy
 {
     public function update(User $user, Notification $notification): bool
     {
-        return $notification->user_id === $user->id;
+        return $user->id === $notification->user_id;
+    }
+
+    public function delete(User $user, Notification $notification): bool
+    {
+        return $user->id === $notification->user_id;
     }
 }

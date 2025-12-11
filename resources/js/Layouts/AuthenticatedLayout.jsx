@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
+import Toast from '@/Components/Toast';
+import { Bell } from 'lucide-react';
 
 export default function Authenticated({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-
+    const { unreadNotifications } = usePage().props;
     // Mapear role_id para nome
     const getRoleName = (roleId) => {
         const roles = {
@@ -44,11 +46,10 @@ export default function Authenticated({ header, children }) {
                         <nav className="hidden md:flex flex-1 justify-center gap-8">
                             <Link
                                 href={route('dashboard')}
-                                className={`text-base font-bold leading-normal transition-colors ${
-                                    route().current('dashboard')
-                                        ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                        : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
-                                }`}
+                                className={`text-base font-bold leading-normal transition-colors ${route().current('dashboard')
+                                    ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
+                                    : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                    }`}
                             >
                                 Dashboard
                             </Link>
@@ -56,21 +57,19 @@ export default function Authenticated({ header, children }) {
                                 <>
                                     <Link
                                         href={route('diets.index')}
-                                        className={`text-base font-bold leading-normal transition-colors ${
-                                            route().current('diets.*')
-                                                ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                                : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
-                                        }`}
+                                        className={`text-base font-bold leading-normal transition-colors ${route().current('diets.*')
+                                            ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
+                                            : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                            }`}
                                     >
                                         Dietas
                                     </Link>
                                     <Link
                                         href={route('foods.index')}
-                                        className={`text-base font-bold leading-normal transition-colors ${
-                                            route().current('foods.*')
-                                                ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                                : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
-                                        }`}
+                                        className={`text-base font-bold leading-normal transition-colors ${route().current('foods.*')
+                                            ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
+                                            : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                            }`}
                                     >
                                         Alimentos
                                     </Link>
@@ -79,27 +78,39 @@ export default function Authenticated({ header, children }) {
                             {user.role_id === 1 && (
                                 <Link
                                     href={route('my-diet.index')}
-                                    className={`text-base font-bold leading-normal transition-colors ${
-                                        route().current('my-diet.*')
-                                            ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                            : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
-                                    }`}
+                                    className={`text-base font-bold leading-normal transition-colors ${route().current('my-diet.*')
+                                        ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
+                                        : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                        }`}
                                 >
                                     Minha Dieta
                                 </Link>
                             )}
+
                         </nav>
 
                         {/* User Actions */}
                         <div className="flex items-center gap-3">
-                            <span className="hidden lg:inline text-deep-space-blue-400 text-sm font-medium px-4 py-2 rounded-lg bg-white border border-deep-space-blue-500/20">
+                            <span className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
                                 {getRoleName(user.role_id)}
                             </span>
                             <Link
                                 href={route('profile.edit')}
-                                className="hidden sm:flex min-w-[84px] max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-5 bg-transparent text-deep-space-blue-500 text-sm font-bold leading-normal tracking-wide border border-deep-space-blue-500/20 hover:bg-deep-space-blue-500/5 transition-colors"
+                                className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
                             >
                                 <span className="truncate">Perfil</span>
+                            </Link>
+                            <Link
+                                href={route('notifications.index')}
+                                className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                            >
+                                <Bell className="h-5 w-5" />
+
+                                {unreadNotifications > 0 && (
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-vivid-tangerine-500 text-xs font-bold text-white">
+                                        {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                                    </span>
+                                )}
                             </Link>
                             <Link
                                 href={route('logout')}
@@ -121,6 +132,7 @@ export default function Authenticated({ header, children }) {
                                     />
                                 </svg>
                             </Link>
+
                         </div>
 
                         {/* Mobile menu button */}
@@ -154,11 +166,10 @@ export default function Authenticated({ header, children }) {
                         <div className="space-y-1 pb-3 pt-2 border-b border-deep-space-blue-500/20">
                             <Link
                                 href={route('dashboard')}
-                                className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${
-                                    route().current('dashboard')
-                                        ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                        : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
-                                }`}
+                                className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('dashboard')
+                                    ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
+                                    : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                    }`}
                             >
                                 Dashboard
                             </Link>
@@ -166,21 +177,19 @@ export default function Authenticated({ header, children }) {
                                 <>
                                     <Link
                                         href={route('diets.index')}
-                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${
-                                            route().current('diets.*')
-                                                ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                                : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
-                                        }`}
+                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('diets.*')
+                                            ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
+                                            : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                            }`}
                                     >
                                         Dietas
                                     </Link>
                                     <Link
                                         href={route('foods.index')}
-                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${
-                                            route().current('foods.*')
-                                                ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                                : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
-                                        }`}
+                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('foods.*')
+                                            ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
+                                            : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                            }`}
                                     >
                                         Alimentos
                                     </Link>
@@ -189,11 +198,10 @@ export default function Authenticated({ header, children }) {
                             {user.role_id === 1 && (
                                 <Link
                                     href={route('my-diet.index')}
-                                    className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${
-                                        route().current('my-diet.*')
-                                            ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                            : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
-                                    }`}
+                                    className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('my-diet.*')
+                                        ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
+                                        : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                        }`}
                                 >
                                     Minha Dieta
                                 </Link>
@@ -207,6 +215,7 @@ export default function Authenticated({ header, children }) {
                     </main>
                 </div>
             </div>
+            <Toast />
         </div>
     );
 }

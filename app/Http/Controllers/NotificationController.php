@@ -11,6 +11,7 @@ use Inertia\Response;
 class NotificationController extends Controller
 {
     use AuthorizesRequests;
+
     public function index(): Response
     {
         $notifications = auth()->user()->notifications()
@@ -31,7 +32,7 @@ class NotificationController extends Controller
             'read_at' => now(),
         ]);
 
-        return back();
+        return back()->with('success', 'Notificação marcada como lida!');
     }
 
     public function markAllAsRead()
@@ -44,5 +45,14 @@ class NotificationController extends Controller
             ]);
 
         return back()->with('success', 'Todas as notificações foram marcadas como lidas!');
+    }
+
+    public function destroy(Notification $notification)
+    {
+        $this->authorize('delete', $notification);
+
+        $notification->delete();
+
+        return back()->with('success', 'Notificação excluída!');
     }
 }

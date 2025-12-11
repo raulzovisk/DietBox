@@ -14,9 +14,11 @@ class UserDietViewController extends Controller
     {
         $user = auth()->user();
 
-        // Obter dieta ativa do usuário
         $activeAssignment = DietAssignment::where('user_id', $user->id)
             ->where('is_active', true)
+            ->whereHas('diet', function ($query) {
+                $query->where('is_active', true);
+            })
             ->with([
                 'diet.dailyMeals.mealFoods.food',
                 'diet.dailyMeals.mealFoods.measure',
@@ -48,6 +50,9 @@ class UserDietViewController extends Controller
 
         $activeAssignment = DietAssignment::where('user_id', $user->id)
             ->where('is_active', true)
+            ->whereHas('diet', function ($query) {
+                $query->where('is_active', true);
+            })
             ->with([
                 'diet.dailyMeals' => function ($query) use ($dayOfWeek) {
                     $query->where('day_of_week', $dayOfWeek)

@@ -5,12 +5,13 @@ import AddMealModal from '@/Components/AddMealModal';
 import AddFoodToMealModal from '@/Components/AddFoodToMealModal';
 import { calculateCalories } from '@/Utils/calorieCalculator';
 import EditFoodModal from '@/Components/EditFoodModal';
-import { showSuccess, showWarning } from '@/Utils/toast';
-import { ArrowLeft, Flame, Users, X, Plus, Trash2, UserX } from 'lucide-react';
+import { showSuccess, showWarning, showError } from '@/Utils/toast';
+import { ArrowLeft, Flame, Users, X, Plus, Trash2, UserX, UserPlus, Edit } from 'lucide-react';
 import { useState } from 'react';
 import axios from 'axios';
 
 export default function Show({ diet, auth, users, foods, measures }) {
+    // ========== STATES ORIGINAIS ==========
     const [selectedDay, setSelectedDay] = useState(0);
     const [selectedMealFood, setSelectedMealFood] = useState(null);
     const [isAlternativesModalOpen, setIsAlternativesModalOpen] = useState(false);
@@ -40,7 +41,6 @@ export default function Show({ diet, auth, users, foods, measures }) {
         'Sábado',
     ];
 
-    // Agrupar refeições por dia da semana
     const mealsByDay = {};
     if (diet.daily_meals) {
         diet.daily_meals.forEach((meal) => {
@@ -62,6 +62,9 @@ export default function Show({ diet, auth, users, foods, measures }) {
     };
 
     const openAddFoodModal = (meal) => {
+
+        console.log('🔍 DEBUG - Meal recebida:', meal); // ✅ Debug
+        console.log('🔍 DEBUG - Meal ID:', meal?.id); // ✅ Debug
         setSelectedMealForFood(meal);
         setIsAddFoodModalOpen(true);
     };
@@ -71,7 +74,16 @@ export default function Show({ diet, auth, users, foods, measures }) {
         setSelectedMealForFood(null);
     };
 
-    // Obter usuários já atribuídos
+    const openEditFoodModal = (mealFood) => {
+        setEditingMealFood(mealFood);
+        setIsEditFoodModalOpen(true);
+    };
+
+    const closeEditFoodModal = () => {
+        setIsEditFoodModalOpen(false);
+        setEditingMealFood(null);
+    };
+
     const assignedUserIds = diet.assignments ? diet.assignments.map(a => a.user_id) : [];
     const availableUsers = users ? users.filter(u => !assignedUserIds.includes(u.id)) : [];
 
@@ -104,20 +116,15 @@ export default function Show({ diet, auth, users, foods, measures }) {
 
         try {
             const response = await axios.delete(`/diets/${diet.id}/unassign/${assignmentId}`);
-
             console.log('Resposta:', response);
-
             setRemovingAssignmentId(null);
             showSuccess(`${userName} removido com sucesso`, 3000);
-
             setTimeout(() => {
                 window.location.reload();
             }, 800);
-
         } catch (err) {
             console.error('Erro ao remover:', err);
             setRemovingAssignmentId(null);
-
             if (err.response?.status === 200) {
                 showSuccess(`${userName} removido com sucesso`, 3000);
                 setTimeout(() => {
@@ -129,468 +136,294 @@ export default function Show({ diet, auth, users, foods, measures }) {
         }
     };
 
-
     return (
-        <AuthenticatedLayout
-            header={
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href="/diets"
-                            className="rounded-lg p-2 hover:bg-gray-100 transition-colors"
-                        >
-                            <ArrowLeft className="h-5 w-5 text-gray-600" />
-                        </Link>
-
-                        <div>
-                            <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                                {diet.name}
-                            </h2>
-                            <p className="text-sm text-gray-600">
-                                Criado por: {diet.nutritionist?.name}
-                            </p>
-                        </div>
-                    </div>
-                    {canEdit && (
-                        <div className="flex gap-2">
-                            <button
-                                onClick={() => setIsAssignModalOpen(true)}
-                                className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-500 transition-colors"
-                            >
-                                <Users className="h-4 w-4" />
-                                Atribuir Usuário
-                            </button>
-                            <Link
-                                href={`/diets/${diet.id}/edit?from=show`}
-                                className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500 transition-colors"
-                            >
-                                Editar
-                            </Link>
-
-                        </div>  
-                    )}
-                </div>
-            }
-        >
+        <AuthenticatedLayout>
             <Head title={diet.name} />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    {/* Informações da Dieta */}
-                    <div className="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">Descrição</h3>
-                                    <p className="mt-1 text-gray-800">
-                                        {diet.description || 'Sem descrição'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">
-                                        Meta de Calorias
-                                    </h3>
-                                    <p className="mt-1 text-gray-800">
-                                        {diet.target_calories
-                                            ? `${diet.target_calories} kcal/dia`
-                                            : 'Não definido'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500">
-                                        Período
-                                    </h3>
-                                    <p className="mt-1 text-gray-800">
-                                        {diet.start_date ? new Date(diet.start_date).toLocaleDateString('pt-BR') : 'N/A'} -{' '}
-                                        {diet.end_date
-                                            ? new Date(diet.end_date).toLocaleDateString('pt-BR')
-                                            : 'Sem data fim'}
-                                    </p>
-                                </div>
-                                <div>
-                                    <h3 className="text-sm font-medium text-gray-500 mb-2">
-                                        Usuários Atribuídos
-                                    </h3>
-                                    <div className="mt-1">
-                                        {diet.assignments && diet.assignments.length > 0 ? (
-                                            <div className="space-y-2">
-                                                {diet.assignments.map((assignment) => (
-                                                    <div
-                                                        key={assignment.id}
-                                                        className="flex items-center justify-between rounded-lg bg-blue-50 border border-blue-200 px-3 py-2 group hover:bg-blue-100 transition-colors"
-                                                    >
-                                                        <div>
-                                                            <p className="text-sm font-medium text-gray-800">
-                                                                {assignment.user.name}
-                                                            </p>
-                                                            <p className="text-xs text-gray-600">
-                                                                {assignment.user.email}
-                                                            </p>
-                                                        </div>
-                                                        {canEdit && (
-                                                            <button
-                                                                onClick={() => handleUnassignUser(assignment.id, assignment.user.name)}
-                                                                disabled={removingAssignmentId === assignment.id}
-                                                                className="opacity-0 group-hover:opacity-100 text-red-600 hover:text-red-900 transition-all p-1 rounded hover:bg-red-50 disabled:opacity-50"
-                                                                title="Remover usuário"
-                                                            >
-                                                                {removingAssignmentId === assignment.id ? (
-                                                                    <span className="inline-block animate-spin">⏳</span>
-                                                                ) : (
-                                                                    <UserX className="h-4 w-4" />
-                                                                )}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <p className="text-gray-600 text-sm">Nenhum usuário atribuído ainda</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+            <div className="space-y-6">
+                {/* Header */}
+                <div className="flex items-center gap-4">
+                    <Link
+                        href={route('diets.index')}
+                        className="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                    >
+                        <ArrowLeft className="h-5 w-5" />
+                    </Link>
+                    <div className="flex-1">
+                        <h1 className="text-2xl font-bold text-slate-900">{diet.name}</h1>
+                        <p className="text-sm text-slate-500">Criado por: {diet.nutritionist?.name}</p>
                     </div>
-
-                    {/* Seletor de Dias */}
-                    <div className="mb-6 overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                        <div className="p-6">
-                            <h3 className="mb-4 text-lg font-semibold text-gray-800">
-                                Selecionar Dia
-                            </h3>
-                            <div className="grid gap-2 grid-cols-2 sm:grid-cols-4 lg:grid-cols-7">
-                                {weekDays.map((day, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setSelectedDay(index)}
-                                        className={`rounded-lg px-3 py-2 text-sm font-medium transition-colors ${selectedDay === index
-                                            ? 'bg-amber-600 text-white'
-                                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                                            }`}
-                                    >
-                                        {day.substring(0, 3)}
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Total de Calorias do Dia */}
-                    {dayCalories > 0 && (
-                        <div className="mb-6 overflow-hidden bg-gradient-to-r from-amber-50 to-orange-50 shadow-sm sm:rounded-lg border-l-4 border-amber-600">
-                            <div className="p-6 flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm font-medium text-gray-600">Total de calorias do dia</p>
-                                    <p className="text-3xl font-bold text-amber-600 mt-2">
-                                        {dayCalories} kcal
-                                    </p>
-                                    {diet.target_calories && (
-                                        <p className="text-sm text-gray-600 mt-2">
-                                            Meta: {diet.target_calories} kcal
-                                            <span className={dayCalories > diet.target_calories ? 'text-red-600 ml-2' : 'text-green-600 ml-2'}>
-                                                ({dayCalories - diet.target_calories > 0 ? '+' : ''}{dayCalories - diet.target_calories} kcal)
-                                            </span>
-                                        </p>
-                                    )}
-                                </div>
-                                <Flame className="h-12 w-12 text-orange-500 opacity-50" />
-                            </div>
-                        </div>
+                    {canEdit && (
+                        <Link
+                            href={route('diets.edit', diet.id)}
+                            className="flex items-center gap-2 rounded-lg h-10 px-4 bg-deep-space-blue-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                        >
+                            <Edit className="h-4 w-4" />
+                            Editar Dieta
+                        </Link>
                     )}
+                </div>
 
-                    {/* Refeições do Dia Selecionado */}
-                    <div className="space-y-6">
-                        <div className="flex items-center justify-between">
-                            <h3 className="text-2xl font-bold text-gray-800">
-                                {weekDays[selectedDay]}
-                            </h3>
-                            {canEdit && (
+                {/* Informações da Dieta */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
+                        <h3 className="text-sm font-medium text-slate-500 mb-1">Descrição</h3>
+                        <p className="text-slate-900">{diet.description || 'Sem descrição'}</p>
+                    </div>
+                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
+                        <h3 className="text-sm font-medium text-slate-500 mb-1">Meta Calórica</h3>
+                        <p className="text-slate-900">
+                            {diet.target_calories ? `${diet.target_calories} kcal/dia` : 'Não definido'}
+                        </p>
+                    </div>
+                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
+                        <h3 className="text-sm font-medium text-slate-500 mb-1">Período</h3>
+                        <p className="text-slate-900">
+                            {diet.start_date ? new Date(diet.start_date).toLocaleDateString('pt-BR') : 'N/A'} -{' '}
+                            {diet.end_date ? new Date(diet.end_date).toLocaleDateString('pt-BR') : 'Sem data fim'}
+                        </p>
+                    </div>
+                </div>
+
+                {/* Seção Usuários Vinculados */}
+                {canEdit && (
+                    <div className="rounded-xl bg-white p-6 shadow-sm border border-deep-space-blue-500/20">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="flex items-center gap-3">
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-vivid-tangerine-500/10">
+                                    <Users className="h-5 w-5 text-vivid-tangerine-500" />
+                                </div>
+                                <div>
+                                    <h2 className="text-lg font-semibold text-deep-space-blue-500">Usuários Vinculados</h2>
+                                    <p className="text-sm text-deep-space-blue-400">Gerencie quem pode acessar esta dieta</p>
+                                </div>
+                            </div>
+                            <button
+                                onClick={() => setIsAssignModalOpen(true)}
+                                className="flex items-center gap-2 rounded-lg h-10 px-4 bg-vivid-tangerine-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
+                            >
+                                <UserPlus className="h-4 w-4" />
+                                Vincular Usuário
+                            </button>
+                        </div>
+
+                        <div className="space-y-2">
+                            {diet.assignments && diet.assignments.length > 0 ? (
+                                diet.assignments.map((assignment) => (
+                                    <div key={assignment.id} className="flex items-center justify-between p-4 rounded-lg bg-slate-50 border border-slate-200">
+                                        <div className="flex items-center gap-3">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vivid-tangerine-100 text-vivid-tangerine-600 font-semibold">
+                                                {assignment.user.name.charAt(0).toUpperCase()}
+                                            </div>
+                                            <div>
+                                                <p className="font-medium text-slate-900">{assignment.user.name}</p>
+                                                <p className="text-sm text-slate-500">{assignment.user.email}</p>
+                                            </div>
+                                        </div>
+                                        <button
+                                            onClick={() => handleUnassignUser(assignment.id, assignment.user.name)}
+                                            disabled={removingAssignmentId === assignment.id}
+                                            className="flex items-center gap-2 rounded-lg h-9 px-3 bg-flag-red-500/10 text-flag-red-500 text-sm font-medium hover:bg-flag-red-500/20 transition-colors disabled:opacity-50"
+                                        >
+                                            <UserX className="h-4 w-4" />
+                                            Remover
+                                        </button>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-8 text-slate-500">
+                                    <Users className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+                                    <p>Nenhum usuário vinculado ainda</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
+                )}
+
+                {/* Dias da Semana */}
+                <div className="rounded-lg bg-white shadow-sm border border-slate-200">
+                    <div className="border-b border-slate-200 overflow-x-auto">
+                        <div className="flex">
+                            {weekDays.map((day, index) => (
+                                <button
+                                    key={index}
+                                    onClick={() => setSelectedDay(index)}
+                                    className={`flex-1 min-w-[120px] px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${selectedDay === index
+                                        ? 'text-vivid-tangerine-600 border-b-2 border-vivid-tangerine-500 bg-vivid-tangerine-50'
+                                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                        }`}
+                                >
+                                    {day}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="p-6">
+                        {/* Botão Adicionar Refeição */}
+                        {canEdit && (
+                            <div className="mb-6 flex justify-end">
                                 <button
                                     onClick={() => setIsAddMealModalOpen(true)}
-                                    className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
+                                    className="flex items-center gap-2 rounded-lg h-10 px-4 bg-vivid-tangerine-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
                                 >
                                     <Plus className="h-4 w-4" />
                                     Adicionar Refeição
                                 </button>
+                            </div>
+                        )}
+
+                        {/* Resumo Calorias */}
+                        <div className="flex items-center justify-between mb-6 p-4 rounded-lg bg-slate-50">
+                            <div className="flex items-center gap-3">
+                                <Flame className="h-6 w-6 text-vivid-tangerine-500" />
+                                <div>
+                                    <p className="text-sm text-slate-500">Total de calorias do dia</p>
+                                    <p className="text-2xl font-bold text-slate-900">{dayCalories} kcal</p>
+                                </div>
+                            </div>
+                            {diet.target_calories && (
+                                <div className="text-right">
+                                    <p className="text-sm text-slate-500">Meta: {diet.target_calories} kcal</p>
+                                    <p className={dayCalories > diet.target_calories ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
+                                        ({dayCalories - diet.target_calories > 0 ? '+' : ''}{dayCalories - diet.target_calories} kcal)
+                                    </p>
+                                </div>
                             )}
                         </div>
 
+                        {/* Refeições */}
                         {mealsByDay[selectedDay] && mealsByDay[selectedDay].length > 0 ? (
-                            mealsByDay[selectedDay].map((meal) => {
-                                const mealCalories = (meal.meal_foods || []).reduce((sum, mf) => {
-                                    return sum + (calculateCalories(mf) || 0);
-                                }, 0);
+                            <div className="space-y-4">
+                                {mealsByDay[selectedDay].map((meal) => {
+                                    const mealCalories = (meal.meal_foods || []).reduce((sum, mf) => {
+                                        return sum + (calculateCalories(mf) || 0);
+                                    }, 0);
 
-                                return (
-                                    <div
-                                        key={meal.id}
-                                        className="overflow-hidden bg-white shadow-sm sm:rounded-lg"
-                                    >
-                                        <div className="border-b border-gray-200 bg-amber-50 px-6 py-4">
-                                            <div className="flex items-center justify-between">
-                                                <div>
-                                                    <h4 className="text-lg font-semibold text-gray-800">
-                                                        {meal.meal_type}
-                                                    </h4>
-                                                    {meal.suggested_time && (
-                                                        <p className="text-sm text-gray-600">
-                                                            {meal.suggested_time}
-                                                        </p>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-4">
-                                                    {mealCalories > 0 && (
+                                    return (
+                                        <div key={meal.id} className="rounded-lg border border-slate-200 bg-white overflow-hidden">
+                                            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <h3 className="font-semibold text-slate-900">{meal.meal_name}</h3>
+                                                        {meal.suggested_time && (
+                                                            <p className="text-sm text-slate-500">{meal.suggested_time}</p>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-4">
                                                         <div className="text-right">
-                                                            <p className="text-xs text-gray-600">Calorias</p>
-                                                            <p className="text-lg font-bold text-amber-600">
-                                                                {mealCalories} kcal
-                                                            </p>
+                                                            <p className="text-xs text-slate-500">Calorias</p>
+                                                            <p className="font-semibold text-slate-900">{mealCalories} kcal</p>
                                                         </div>
-                                                    )}
-                                                    {canEdit && (
-                                                        <button
-                                                            onClick={() => openAddFoodModal(meal)}
-                                                            className="rounded-md bg-blue-600 px-3 py-1 text-xs font-semibold text-white hover:bg-blue-500 transition-colors inline-flex items-center gap-1"
-                                                        >
-                                                            <Plus className="h-3 w-3" />
-                                                            Alimento
-                                                        </button>
-                                                    )}
+                                                        {canEdit && (
+                                                            <button
+                                                                onClick={() => openAddFoodModal(meal)}
+                                                                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-vivid-tangerine-600 hover:bg-vivid-tangerine-50 rounded-lg transition-colors"
+                                                            >
+                                                                <Plus className="h-4 w-4" />
+                                                                Alimento
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
 
-                                        <div className="p-6">
-                                            {meal.meal_foods && meal.meal_foods.length > 0 ? (
-                                                <div className="space-y-4">
-                                                    {meal.meal_foods.map((mealFood) => {
-                                                        const foodCalories = calculateCalories(mealFood);
-                                                        return (
-                                                            <div
-                                                                key={mealFood.id}
-                                                                className="rounded-lg border border-gray-200 p-4 hover:border-amber-200 transition-colors flex items-start justify-between group"
-                                                            >
-                                                                <div className="flex-1">
-                                                                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                                                                        <h5 className="font-semibold text-gray-800">
-                                                                            {mealFood.food?.name}
-                                                                        </h5>
-                                                                        {mealFood.food?.category && (
-                                                                            <span className="rounded bg-amber-100 px-2 py-1 text-xs font-medium text-amber-700">
-                                                                                {mealFood.food.category}
-                                                                            </span>
+                                            <div className="p-4">
+                                                {meal.meal_foods && meal.meal_foods.length > 0 ? (
+                                                    <div className="space-y-2">
+                                                        {meal.meal_foods.map((mealFood) => {
+                                                            const foodCalories = calculateCalories(mealFood);
+
+                                                            return (
+                                                                <div key={mealFood.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                                                                    <div className="flex-1">
+                                                                        <p className="font-medium text-slate-900">{mealFood.food.name}</p>
+                                                                        <p className="text-sm text-slate-600">
+                                                                            {mealFood.quantity} {mealFood.measure?.abbreviation}
+                                                                            {foodCalories && <span className="ml-2">🔥 {foodCalories} kcal</span>}
+                                                                        </p>
+                                                                        {mealFood.preparation_notes && (
+                                                                            <p className="text-xs text-slate-500 mt-1">{mealFood.preparation_notes}</p>
                                                                         )}
                                                                     </div>
-                                                                    <p className="text-sm text-gray-600">
-                                                                        {mealFood.quantity} {mealFood.measure?.abbreviation}
-                                                                    </p>
-                                                                    {foodCalories && (
-                                                                        <p className="text-sm text-orange-600 font-semibold mt-1">
-                                                                            🔥 {foodCalories} kcal
-                                                                        </p>
-                                                                    )}
-                                                                    {mealFood.preparation_notes && (
-                                                                        <p className="mt-2 text-sm italic text-gray-500">
-                                                                            {mealFood.preparation_notes}
-                                                                        </p>
-                                                                    )}
-                                                                </div>
-
-                                                                <div className="flex items-center gap-2 ml-4">
-                                                                    {mealFood.alternatives && mealFood.alternatives.length > 0 && (
-                                                                        <button
-                                                                            onClick={() => openAlternativesModal(mealFood)}
-                                                                            type="button"
-                                                                            className="rounded bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 hover:bg-blue-100 transition-colors whitespace-nowrap border border-blue-200"
-                                                                        >
-                                                                            💡 {mealFood.alternatives.length}
-                                                                        </button>
-                                                                    )}
                                                                     {canEdit && (
-                                                                        <button
-                                                                            onClick={() => {
-                                                                                setEditingMealFood(mealFood);
-                                                                                setIsEditFoodModalOpen(true);
-                                                                            }}
-                                                                            className="opacity-0 group-hover:opacity-100 rounded-md px-2 py-1 text-xs font-medium text-amber-600 hover:bg-amber-50 transition-all"
-                                                                        >
-                                                                            Editar
-                                                                        </button>
+                                                                        <div className="flex items-center gap-3">
+                                                                            <button
+                                                                                onClick={() => openAlternativesModal(mealFood)}
+                                                                                className="text-sm text-vivid-tangerine-600 hover:underline"
+                                                                            >
+                                                                                Alternativas
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={() => openEditFoodModal(mealFood)}
+                                                                                className="text-deep-space-blue-500 hover:text-deep-space-blue-600 transition-colors"
+                                                                            >
+                                                                                <Edit className="h-4 w-4" />
+                                                                            </button>
+                                                                        </div>
                                                                     )}
                                                                 </div>
-                                                            </div>
-                                                        );
-                                                    })}
-                                                </div>
-                                            ) : (
-                                                <p className="text-center text-gray-500">
-                                                    Nenhum alimento nesta refeição
-                                                </p>
-                                            )}
+                                                            );
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <p className="text-center text-slate-500 py-4">Nenhum alimento nesta refeição</p>
+                                                )}
+                                            </div>
                                         </div>
-                                    </div>
-                                );
-                            })
+                                    );
+                                })}
+                            </div>
                         ) : (
-                            <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                                <div className="p-6 text-center text-gray-500">
-                                    <p className="mb-4">Nenhuma refeição cadastrada para este dia.</p>
-                                    {canEdit && (
-                                        <button
-                                            onClick={() => setIsAddMealModalOpen(true)}
-                                            className="inline-flex items-center gap-2 rounded-md bg-green-600 px-4 py-2 text-sm font-semibold text-white hover:bg-green-500 transition-colors"
-                                        >
-                                            <Plus className="h-4 w-4" />
-                                            Começar Adicionando Uma Refeição
-                                        </button>
-                                    )}
-                                </div>
+                            <div className="text-center py-12">
+                                <p className="text-slate-500 mb-4">Nenhuma refeição cadastrada para este dia.</p>
+                                {canEdit && (
+                                    <button
+                                        onClick={() => setIsAddMealModalOpen(true)}
+                                        className="inline-flex items-center gap-2 px-4 py-2 bg-vivid-tangerine-500 text-white rounded-lg hover:opacity-90 transition-opacity"
+                                    >
+                                        <Plus className="h-4 w-4" />
+                                        Adicionar Refeição
+                                    </button>
+                                )}
                             </div>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Modal de Alternativas */}
-            {selectedMealFood && (
-                <AlternativesModal
-                    mealFood={selectedMealFood}
-                    isOpen={isAlternativesModalOpen}
-                    onClose={closeAlternativesModal}
-                />
-            )}
-
-            {/* Modal de Adicionar Refeição */}
-            <AddMealModal
-                dietId={diet.id}
-                dayOfWeek={selectedDay}
-                isOpen={isAddMealModalOpen}
-                onClose={() => setIsAddMealModalOpen(false)}
-            />
-
-            {/* Modal de Adicionar Alimento */}
-            {selectedMealForFood && (
-                <AddFoodToMealModal
-                    dailyMealId={selectedMealForFood.id}
-                    foods={foods}
-                    measures={measures}
-                    isOpen={isAddFoodModalOpen}
-                    onClose={closeAddFoodModal}
-                />
-            )}
-
-            {/* Modal de Editar Alimento */}
-            {editingMealFood && (
-                <EditFoodModal
-                    mealFood={editingMealFood}
-                    foods={foods}
-                    measures={measures}
-                    isOpen={isEditFoodModalOpen}
-                    onClose={() => {
-                        setIsEditFoodModalOpen(false);
-                        setEditingMealFood(null);
-                    }}
-                />
-            )}
-
-            {/* Modal de Atribuição de Usuário */}
+            {/* ========== MODAL VINCULAR USUÁRIO ========== */}
             {isAssignModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-                    <div className="w-full max-w-md rounded-lg bg-white p-6 shadow-xl max-h-[90vh] overflow-y-auto">
-                        <div className="mb-4 flex items-center justify-between border-b pb-4">
-                            <h3 className="text-lg font-semibold text-gray-800">
-                                Atribuir Usuário à Dieta
-                            </h3>
-                            <button
-                                onClick={() => setIsAssignModalOpen(false)}
-                                className="rounded-lg p-2 hover:bg-gray-100 transition-colors"
-                                type="button"
-                            >
-                                <X className="h-6 w-6 text-gray-600" />
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
+                            <h3 className="text-lg font-semibold text-slate-900">Vincular Usuário à Dieta</h3>
+                            <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                                <X className="h-5 w-5" />
                             </button>
                         </div>
-
-                        <form onSubmit={handleAssignUser}>
-                            <div className="mb-4">
-                                <label
-                                    htmlFor="user_id"
-                                    className="block text-sm font-medium text-gray-700 mb-2"
-                                >
-                                    Selecione um Usuário *
-                                </label>
+                        <form onSubmit={handleAssignUser} className="p-6 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-slate-700 mb-2">Selecione o Usuário</label>
                                 <select
-                                    id="user_id"
                                     value={data.user_id}
                                     onChange={(e) => setData('user_id', e.target.value)}
-                                    className="w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                    className="w-full rounded-lg border-slate-300 focus:border-vivid-tangerine-500 focus:ring-vivid-tangerine-500"
                                     required
                                 >
-                                    <option value="">-- Selecione --</option>
-                                    {availableUsers && availableUsers.length > 0 ? (
-                                        availableUsers.map((user) => (
-                                            <option key={user.id} value={user.id}>
-                                                {user.name} ({user.email})
-                                            </option>
-                                        ))
-                                    ) : (
-                                        <option disabled>Nenhum usuário disponível</option>
-                                    )}
+                                    <option value="">Escolha um usuário...</option>
+                                    {availableUsers.map((user) => (
+                                        <option key={user.id} value={user.id}>{user.name} ({user.email})</option>
+                                    ))}
                                 </select>
-                                {errors.user_id && (
-                                    <div className="mt-2 rounded-lg bg-red-50 border border-red-200 p-3">
-                                        <p className="text-sm text-red-600">{errors.user_id}</p>
-                                    </div>
-                                )}
+                                {errors.user_id && <p className="mt-1 text-sm text-red-600">{errors.user_id}</p>}
                             </div>
-
-                            {/* Status da Dieta */}
-                            <div className={`mb-4 rounded-lg p-3 border ${diet.is_active
-                                ? 'bg-green-50 border-green-200'
-                                : 'bg-gray-50 border-gray-200'
-                                }`}>
-                                <p className="text-xs font-medium text-gray-700 mb-1">Status desta dieta:</p>
-                                <p className={`text-sm font-semibold ${diet.is_active ? 'text-green-700' : 'text-gray-600'
-                                    }`}>
-                                    {diet.is_active ? '✅ Ativa (usuário verá no app)' : '⚪ Inativa (usuário não verá)'}
-                                </p>
-                                {diet.is_active && (
-                                    <p className="text-xs text-green-600 mt-1">
-                                        ⚠️ Usuários só podem ter 1 dieta ativa por vez
-                                    </p>
-                                )}
-                            </div>
-
-                            {/* Usuários já atribuídos */}
-                            {diet.assignments && diet.assignments.length > 0 && (
-                                <div className="mb-4 rounded-lg bg-blue-50 p-3 border border-blue-200">
-                                    <p className="text-xs font-medium text-blue-700 mb-2">
-                                        Usuários atribuídos a esta dieta ({diet.assignments.length}):
-                                    </p>
-                                    <div className="space-y-1">
-                                        {diet.assignments.map((assignment) => (
-                                            <p key={assignment.id} className="text-xs text-blue-600">
-                                                • {assignment.user.name}
-                                            </p>
-                                        ))}
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className="flex justify-end gap-2 border-t pt-4">
-                                <button
-                                    type="button"
-                                    onClick={() => setIsAssignModalOpen(false)}
-                                    className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
-                                >
+                            <div className="flex gap-3">
+                                <button type="button" onClick={() => setIsAssignModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
                                     Cancelar
                                 </button>
-                                <button
-                                    type="submit"
-                                    disabled={processing}
-                                    className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-50 transition-colors"
-                                >
-                                    {processing ? 'Atribuindo...' : 'Atribuir'}
+                                <button type="submit" disabled={processing} className="flex-1 px-4 py-2 bg-vivid-tangerine-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50">
+                                    {processing ? 'Vinculando...' : 'Vincular'}
                                 </button>
                             </div>
                         </form>
@@ -598,6 +431,37 @@ export default function Show({ diet, auth, users, foods, measures }) {
                 </div>
             )}
 
+            <AddMealModal
+                isOpen={isAddMealModalOpen}
+                onClose={() => setIsAddMealModalOpen(false)}
+                dietId={diet.id}
+                dayOfWeek={selectedDay}
+            />
+
+            <AddFoodToMealModal
+                isOpen={isAddFoodModalOpen}
+                onClose={closeAddFoodModal}
+                dailyMealId={selectedMealForFood?.id}
+                meal={selectedMealForFood}
+                foods={foods}
+                measures={measures}
+            />
+
+            <EditFoodModal
+                isOpen={isEditFoodModalOpen}
+                onClose={closeEditFoodModal}
+                mealFood={editingMealFood}
+                foods={foods}
+                measures={measures}
+            />
+
+            <AlternativesModal
+                isOpen={isAlternativesModalOpen}
+                onClose={closeAlternativesModal}
+                mealFood={selectedMealFood}
+                foods={foods}
+                measures={measures}
+            />
         </AuthenticatedLayout>
     );
 }
