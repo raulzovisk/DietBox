@@ -52,7 +52,7 @@ export default function Login({ status, canResetPassword }) {
                 {/* Main Content */}
                 <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                     <div className="w-full max-w-md space-y-8">
-                        <div 
+                        <div
                             className="bg-white p-8 sm:p-10 rounded-lg shadow-lg border border-slate-200"
                             style={{
                                 boxShadow: '0 0 30px 5px rgba(249, 115, 22, 0.2)'
@@ -61,17 +61,17 @@ export default function Login({ status, canResetPassword }) {
                             {/* Icon and Title */}
                             <div className="flex flex-col items-center mb-8">
                                 <div className="bg-orange-500 rounded-full p-3 mb-4 inline-flex">
-                                    <svg 
-                                        className="h-8 w-8 text-white" 
-                                        fill="none" 
-                                        viewBox="0 0 24 24" 
+                                    <svg
+                                        className="h-8 w-8 text-white"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
                                         stroke="currentColor"
                                     >
-                                        <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" 
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                                         />
                                     </svg>
                                 </div>
@@ -91,8 +91,8 @@ export default function Login({ status, canResetPassword }) {
                             <form onSubmit={submit} className="space-y-6">
                                 {/* Email */}
                                 <div>
-                                    <label 
-                                        htmlFor="email" 
+                                    <label
+                                        htmlFor="email"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         E-mail ou Nome de Usuário
@@ -119,8 +119,8 @@ export default function Login({ status, canResetPassword }) {
 
                                 {/* Password */}
                                 <div>
-                                    <label 
-                                        htmlFor="password" 
+                                    <label
+                                        htmlFor="password"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         Senha

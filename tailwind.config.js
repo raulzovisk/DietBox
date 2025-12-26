@@ -3,6 +3,7 @@ import forms from '@tailwindcss/forms';
 
 /** @type {import('tailwindcss').Config} */
 export default {
+    darkMode: 'class',
     content: [
         './vendor/laravel/framework/src/Illuminate/View/Resources/**/*.blade.php',
         './storage/framework/views/*.php',
@@ -13,8 +14,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
-                display: ['Manrope', 'sans-serif'],
+                sans: ['Nunito', ...defaultTheme.fontFamily.sans],
+                display: ['Poppins', 'sans-serif'],
             },
             borderRadius: {
                 DEFAULT: '0.25rem',

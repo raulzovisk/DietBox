@@ -1,45 +1,62 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
-import { Pencil, Trash2, Plus, Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Pencil, Lock, Unlock, Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Index({ foods, filters }) {
+export default function Index({ users, filters, roles }) {
     const [search, setSearch] = useState(filters?.search || '');
 
     const handleSearch = (e) => {
         e.preventDefault();
-        router.get('/foods', { search }, { preserveState: true });
+        router.get('/users', { search }, { preserveState: true });
     };
 
-    const handleDelete = (id) => {
-        if (confirm('Tem certeza que deseja deletar este alimento?')) {
-            router.delete(`/foods/${id}`);
+    const handleBlock = (id) => {
+        if (confirm('Tem certeza que deseja bloquear este usuário?')) {
+            router.delete(`/users/${id}`);
         }
     };
 
-    const foodsData = foods?.data || [];
+    const handleUnblock = (id) => {
+        if (confirm('Tem certeza que deseja desbloquear este usuário?')) {
+            router.post(`/users/${id}/restore`);
+        }
+    };
+
+    const getRoleName = (roleId) => {
+        const roleNames = {
+            1: 'Usuário',
+            2: 'Nutricionista',
+            3: 'Administrador',
+        };
+        return roleNames[roleId] || 'Desconhecido';
+    };
+
+    const getRoleBadgeColor = (roleId) => {
+        const colors = {
+            1: 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300',
+            2: 'bg-vivid-tangerine-100 dark:bg-vivid-tangerine-500/20 text-vivid-tangerine-600 dark:text-vivid-tangerine-400',
+            3: 'bg-flag-red-100 dark:bg-flag-red-500/20 text-flag-red-600 dark:text-flag-red-400',
+        };
+        return colors[roleId] || 'bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300';
+    };
+
+    const usersData = users?.data || [];
 
     return (
         <AuthenticatedLayout>
-            <Head title="Alimentos" />
+            <Head title="Gerenciar Usuários" />
 
             {/* Header Section */}
             <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
                 <div className="flex min-w-72 flex-col gap-1">
                     <h1 className="text-deep-space-blue-500 dark:text-slate-100 text-3xl md:text-4xl font-black leading-tight">
-                        Gerenciar Alimentos
+                        Gerenciar Usuários
                     </h1>
                     <p className="text-deep-space-blue-400 dark:text-slate-400 text-base font-normal leading-normal">
-                        Navegue, pesquise e gerencie os alimentos no banco de dados.
+                        Visualize, pesquise e gerencie os usuários do sistema.
                     </p>
                 </div>
-                <Link
-                    href={route('foods.create')}
-                    className="flex items-center justify-center gap-2 min-w-[84px] cursor-pointer overflow-hidden rounded-lg h-11 px-6 bg-vivid-tangerine-500 text-white text-sm font-bold leading-normal hover:opacity-90 transition-opacity"
-                >
-                    <Plus className="h-5 w-5" />
-                    <span className="truncate">Novo Alimento</span>
-                </Link>
             </div>
 
             {/* Search Section */}
@@ -54,7 +71,7 @@ export default function Index({ foods, filters }) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-deep-space-blue-500 dark:text-slate-100 focus:outline-0 focus:ring-2 focus:ring-vivid-tangerine-500/50 border-none bg-white dark:bg-slate-800 h-full placeholder:text-deep-space-blue-400 dark:placeholder:text-slate-500 px-2 text-base font-normal leading-normal"
-                            placeholder="Pesquisar por um alimento..."
+                            placeholder="Pesquisar por nome ou email..."
                         />
                     </div>
                 </label>
@@ -76,13 +93,16 @@ export default function Index({ foods, filters }) {
                                     Nome
                                 </th>
                                 <th className="px-6 py-4 text-left text-deep-space-blue-400 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                    Categoria
+                                    Email
                                 </th>
                                 <th className="px-6 py-4 text-left text-deep-space-blue-400 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                    Calorias (100g)
+                                    Função
                                 </th>
                                 <th className="px-6 py-4 text-left text-deep-space-blue-400 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">
-                                    Proteínas (g)
+                                    Status
+                                </th>
+                                <th className="px-6 py-4 text-left text-deep-space-blue-400 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">
+                                    Criado em
                                 </th>
                                 <th className="px-6 py-4 text-left text-deep-space-blue-400 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">
                                     Ações
@@ -90,53 +110,69 @@ export default function Index({ foods, filters }) {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-deep-space-blue-500/10 dark:divide-slate-700">
-                            {foodsData.length > 0 ? (
-                                foodsData.map((food) => (
+                            {usersData.length > 0 ? (
+                                usersData.map((user) => (
                                     <tr
-                                        key={food.id}
-                                        className="hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                                        key={user.id}
+                                        className={`hover:bg-black/5 dark:hover:bg-white/5 transition-colors ${user.deleted_at ? 'opacity-60' : ''}`}
                                     >
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="text-sm font-medium text-deep-space-blue-500 dark:text-slate-100">
-                                                {food.name}
+                                                {user.name}
                                             </div>
-                                            {food.description && (
-                                                <div className="text-xs text-deep-space-blue-400 dark:text-slate-400">
-                                                    {food.description.substring(0, 50)}...
-                                                </div>
-                                            )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-deep-space-blue-400 dark:text-slate-300">
-                                            {food.category ? (
-                                                <span className="inline-flex rounded-full bg-vivid-tangerine-100 dark:bg-vivid-tangerine-500/20 px-2 text-xs font-semibold leading-5 text-vivid-tangerine-600 dark:text-vivid-tangerine-400">
-                                                    {food.category}
+                                            {user.email}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold leading-5 ${getRoleBadgeColor(user.role_id)}`}>
+                                                {getRoleName(user.role_id)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            {user.deleted_at ? (
+                                                <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold leading-5 bg-flag-red-100 dark:bg-flag-red-500/20 text-flag-red-600 dark:text-flag-red-400">
+                                                    Bloqueado
                                                 </span>
                                             ) : (
-                                                '-'
+                                                <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold leading-5 bg-green-100 dark:bg-green-500/20 text-green-600 dark:text-green-400">
+                                                    Ativo
+                                                </span>
                                             )}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-deep-space-blue-400 dark:text-slate-300">
-                                            {food.calories_per_100g ? `${food.calories_per_100g} kcal` : '-'}
-                                        </td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-deep-space-blue-400 dark:text-slate-300">
-                                            {food.protein_per_100g ? `${food.protein_per_100g}g` : '-'}
+                                            {new Date(user.created_at).toLocaleDateString('pt-BR')}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                             <div className="flex items-center gap-4">
-                                                <Link
-                                                    href={route('foods.edit', food.id)}
-                                                    className="text-vivid-tangerine-500 hover:underline transition-all"
-                                                    aria-label={`Editar ${food.name}`}
-                                                >
-                                                    <Pencil className="h-5 w-5" />
-                                                </Link>
-                                                <button
-                                                    onClick={() => handleDelete(food.id)}
-                                                    className="text-flag-red-500 hover:underline transition-all"
-                                                    aria-label={`Deletar ${food.name}`}
-                                                >
-                                                    <Trash2 className="h-5 w-5" />
-                                                </button>
+                                                {!user.deleted_at && (
+                                                    <Link
+                                                        href={route('users.edit', user.id)}
+                                                        className="text-vivid-tangerine-500 hover:underline transition-all"
+                                                        aria-label={`Editar ${user.name}`}
+                                                    >
+                                                        <Pencil className="h-5 w-5" />
+                                                    </Link>
+                                                )}
+                                                {user.deleted_at ? (
+                                                    <button
+                                                        onClick={() => handleUnblock(user.id)}
+                                                        className="text-green-500 hover:text-green-600 transition-all"
+                                                        aria-label={`Desbloquear ${user.name}`}
+                                                        title="Desbloquear usuário"
+                                                    >
+                                                        <Unlock className="h-5 w-5" />
+                                                    </button>
+                                                ) : (
+                                                    <button
+                                                        onClick={() => handleBlock(user.id)}
+                                                        className="text-flag-red-500 hover:text-flag-red-600 transition-all"
+                                                        aria-label={`Bloquear ${user.name}`}
+                                                        title="Bloquear usuário"
+                                                    >
+                                                        <Lock className="h-5 w-5" />
+                                                    </button>
+                                                )}
                                             </div>
                                         </td>
                                     </tr>
@@ -144,7 +180,7 @@ export default function Index({ foods, filters }) {
                             ) : (
                                 <tr>
                                     <td
-                                        colSpan="5"
+                                        colSpan="6"
                                         className="px-6 py-12 text-center"
                                     >
                                         <div className="flex flex-col items-center justify-center gap-4">
@@ -159,24 +195,17 @@ export default function Index({ foods, filters }) {
                                                         strokeLinecap="round"
                                                         strokeLinejoin="round"
                                                         strokeWidth={2}
-                                                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
+                                                        d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"
                                                     />
                                                 </svg>
                                             </div>
                                             <div className="text-center">
                                                 <p className="text-deep-space-blue-500 dark:text-slate-100 font-semibold mb-1">
-                                                    Nenhum alimento encontrado
+                                                    Nenhum usuário encontrado
                                                 </p>
-                                                <p className="text-deep-space-blue-400 dark:text-slate-400 text-sm mb-4">
-                                                    Comece adicionando um novo alimento.
+                                                <p className="text-deep-space-blue-400 dark:text-slate-400 text-sm">
+                                                    Tente ajustar os filtros de pesquisa.
                                                 </p>
-                                                <Link
-                                                    href={route('foods.create')}
-                                                    className="inline-flex items-center justify-center gap-2 rounded-lg h-10 px-5 bg-vivid-tangerine-500 text-white text-sm font-bold hover:opacity-90 transition-opacity"
-                                                >
-                                                    <Plus className="h-4 w-4" />
-                                                    Novo Alimento
-                                                </Link>
                                             </div>
                                         </div>
                                     </td>
@@ -187,17 +216,17 @@ export default function Index({ foods, filters }) {
                 </div>
 
                 {/* Pagination Footer */}
-                {foodsData.length > 0 && (
+                {usersData.length > 0 && (
                     <div className="flex items-center justify-between p-4 border-t border-deep-space-blue-500/10 dark:border-slate-700">
                         <div className="text-sm text-deep-space-blue-400 dark:text-slate-400">
-                            Página <span className="font-bold">{foods.current_page}</span> de{' '}
-                            <span className="font-bold">{foods.last_page}</span>
+                            Página <span className="font-bold">{users.current_page}</span> de{' '}
+                            <span className="font-bold">{users.last_page}</span>
                         </div>
                         <div className="flex items-center justify-center">
-                            {/* Botão Anterior */}
-                            {foods.prev_page_url ? (
+                            {/* Previous Button */}
+                            {users.prev_page_url ? (
                                 <Link
-                                    href={foods.prev_page_url}
+                                    href={users.prev_page_url}
                                     preserveState
                                     className="flex size-10 items-center justify-center text-deep-space-blue-400 dark:text-slate-400 hover:text-deep-space-blue-500 dark:hover:text-slate-100 transition-colors"
                                     aria-label="Página Anterior"
@@ -210,21 +239,21 @@ export default function Index({ foods, filters }) {
                                 </span>
                             )}
 
-                            {/* Números de página */}
-                            {[...Array(foods.last_page)].map((_, index) => {
+                            {/* Page Numbers */}
+                            {[...Array(users.last_page)].map((_, index) => {
                                 const pageNumber = index + 1;
                                 if (
                                     pageNumber === 1 ||
-                                    pageNumber === foods.last_page ||
-                                    (pageNumber >= foods.current_page - 1 && pageNumber <= foods.current_page + 1)
+                                    pageNumber === users.last_page ||
+                                    (pageNumber >= users.current_page - 1 && pageNumber <= users.current_page + 1)
                                 ) {
                                     return (
                                         <Link
                                             key={pageNumber}
-                                            href={`/foods?page=${pageNumber}`}
+                                            href={`/users?page=${pageNumber}`}
                                             preserveState
-                                            className={`text-sm font-${pageNumber === foods.current_page ? 'bold' : 'normal'
-                                                } leading-normal flex size-10 items-center justify-center rounded-full transition-colors ${pageNumber === foods.current_page
+                                            className={`text-sm font-${pageNumber === users.current_page ? 'bold' : 'normal'
+                                                } leading-normal flex size-10 items-center justify-center rounded-full transition-colors ${pageNumber === users.current_page
                                                     ? 'text-white bg-vivid-tangerine-500'
                                                     : 'text-deep-space-blue-400 dark:text-slate-400 hover:bg-black/5 dark:hover:bg-white/5'
                                                 }`}
@@ -233,8 +262,8 @@ export default function Index({ foods, filters }) {
                                         </Link>
                                     );
                                 } else if (
-                                    pageNumber === foods.current_page - 2 ||
-                                    pageNumber === foods.current_page + 2
+                                    pageNumber === users.current_page - 2 ||
+                                    pageNumber === users.current_page + 2
                                 ) {
                                     return (
                                         <span
@@ -248,10 +277,10 @@ export default function Index({ foods, filters }) {
                                 return null;
                             })}
 
-                            {/* Botão Próximo */}
-                            {foods.next_page_url ? (
+                            {/* Next Button */}
+                            {users.next_page_url ? (
                                 <Link
-                                    href={foods.next_page_url}
+                                    href={users.next_page_url}
                                     preserveState
                                     className="flex size-10 items-center justify-center text-deep-space-blue-400 dark:text-slate-400 hover:text-deep-space-blue-500 dark:hover:text-slate-100 transition-colors"
                                     aria-label="Próxima Página"

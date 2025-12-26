@@ -1,54 +1,50 @@
 import { useState } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import Toast from '@/Components/Toast';
-import { Bell } from 'lucide-react';
+import { Bell, Sun, Moon, Menu, X } from 'lucide-react';
+import { ThemeProvider, useTheme } from '@/Contexts/ThemeContext';
 
-export default function Authenticated({ header, children }) {
+function AuthenticatedContent({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
     const { unreadNotifications } = usePage().props;
-    // Mapear role_id para nome
-    const getRoleName = (roleId) => {
-        const roles = {
-            1: 'Usuário',
-            2: 'Nutricionista',
-            3: 'Administrador',
-        };
-        return roles[roleId] || 'Usuário';
-    };
+    const { theme, toggleTheme } = useTheme();
 
     return (
-        <div className="min-h-screen bg-slate-50">
-            <div className="px-4 sm:px-8 md:px-12 lg:px-20 xl:px-40 flex flex-col min-h-screen">
-                <div className="max-w-7xl w-full mx-auto flex flex-col flex-1">
-                    {/* Header - CINZA E BOLD */}
-                    <header className="flex items-center justify-between whitespace-nowrap border-b border-deep-space-blue-500/20 px-2 md:px-4 py-6 bg-slate-50">
-                        <div className="flex items-center gap-4">
-                            <svg
-                                className="h-10 w-10 text-vivid-tangerine-500"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                            >
-                                <path
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                    strokeWidth={2}
-                                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                                />
-                            </svg>
-                            <h2 className="text-deep-space-blue-500 text-2xl font-bold leading-tight tracking-tight">
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
+            <div className="px-4 sm:px-6 md:px-8 lg:px-12 flex flex-col min-h-screen">
+                <div className="w-full flex flex-col flex-1">
+                    {/* Header */}
+                    <header className="flex items-center justify-between whitespace-nowrap border-b border-slate-200 dark:border-slate-700/50 py-4 bg-slate-50 dark:bg-slate-900 transition-colors">
+                        {/* Logo */}
+                        <Link href={route('dashboard')} className="flex items-center gap-3 group">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-vivid-tangerine-500 to-vivid-tangerine-600 shadow-lg shadow-vivid-tangerine-500/25 group-hover:shadow-vivid-tangerine-500/40 transition-shadow">
+                                <svg
+                                    className="h-6 w-6 text-white"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                                    />
+                                </svg>
+                            </div>
+                            <h2 className="text-deep-space-blue-500 dark:text-slate-100 text-xl font-bold leading-tight tracking-tight hidden sm:block">
                                 NutriSystem
                             </h2>
-                        </div>
+                        </Link>
 
-                        {/* Desktop Navigation - MAIS BOLD */}
-                        <nav className="hidden md:flex flex-1 justify-center gap-8">
+                        {/* Desktop Navigation */}
+                        <nav className="hidden md:flex items-center gap-1">
                             <Link
                                 href={route('dashboard')}
-                                className={`text-base font-bold leading-normal transition-colors ${route().current('dashboard')
-                                    ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                    : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('dashboard')
+                                    ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                     }`}
                             >
                                 Dashboard
@@ -57,18 +53,18 @@ export default function Authenticated({ header, children }) {
                                 <>
                                     <Link
                                         href={route('diets.index')}
-                                        className={`text-base font-bold leading-normal transition-colors ${route().current('diets.*')
-                                            ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                            : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('diets.*')
+                                            ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                             }`}
                                     >
                                         Dietas
                                     </Link>
                                     <Link
                                         href={route('foods.index')}
-                                        className={`text-base font-bold leading-normal transition-colors ${route().current('foods.*')
-                                            ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                            : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('foods.*')
+                                            ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                             }`}
                                     >
                                         Alimentos
@@ -78,45 +74,73 @@ export default function Authenticated({ header, children }) {
                             {user.role_id === 1 && (
                                 <Link
                                     href={route('my-diet.index')}
-                                    className={`text-base font-bold leading-normal transition-colors ${route().current('my-diet.*')
-                                        ? 'text-vivid-tangerine-500 border-b-2 border-vivid-tangerine-500 pb-1'
-                                        : 'text-deep-space-blue-400 hover:text-vivid-tangerine-500'
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('my-diet.*')
+                                        ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
                                         }`}
                                 >
                                     Minha Dieta
                                 </Link>
                             )}
-
+                            {user.role_id === 3 && (
+                                <Link
+                                    href={route('users.index')}
+                                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('users.*')
+                                        ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                        }`}
+                                >
+                                    Usuários
+                                </Link>
+                            )}
                         </nav>
 
                         {/* User Actions */}
-                        <div className="flex items-center gap-3">
-                            <span className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
-                                {getRoleName(user.role_id)}
-                            </span>
-                            <Link
-                                href={route('profile.edit')}
-                                className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                        <div className="flex items-center gap-2">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="flex items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200"
+                                title={theme === 'light' ? 'Ativar modo escuro' : 'Ativar modo claro'}
                             >
-                                <span className="truncate">Perfil</span>
-                            </Link>
+                                {theme === 'light' ? (
+                                    <Moon className="h-5 w-5" />
+                                ) : (
+                                    <Sun className="h-5 w-5" />
+                                )}
+                            </button>
+
+                            {/* Notifications */}
                             <Link
                                 href={route('notifications.index')}
-                                className="relative flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors"
+                                className="relative flex items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200"
                             >
                                 <Bell className="h-5 w-5" />
-
                                 {unreadNotifications > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-vivid-tangerine-500 text-xs font-bold text-white">
+                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-vivid-tangerine-500 text-xs font-bold text-white shadow-lg">
                                         {unreadNotifications > 99 ? '99+' : unreadNotifications}
                                     </span>
                                 )}
                             </Link>
+
+                            {/* Profile */}
+                            <Link
+                                href={route('profile.edit')}
+                                className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white transition-all duration-200"
+                            >
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 text-slate-600 dark:text-slate-200 font-semibold text-sm">
+                                    {user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-sm font-medium truncate max-w-[100px]">{user.name}</span>
+                            </Link>
+
+                            {/* Logout */}
                             <Link
                                 href={route('logout')}
                                 method="post"
                                 as="button"
-                                className="flex max-w-[480px] cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 bg-transparent text-deep-space-blue-500 gap-2 text-sm font-bold leading-normal tracking-wide min-w-0 px-3 border border-deep-space-blue-500/20 hover:bg-deep-space-blue-500/5 transition-colors"
+                                className="hidden sm:flex items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-red-50 dark:hover:bg-red-500/10 hover:text-red-600 dark:hover:text-red-400 transition-all duration-200"
+                                title="Sair"
                             >
                                 <svg
                                     className="h-5 w-5"
@@ -133,42 +157,28 @@ export default function Authenticated({ header, children }) {
                                 </svg>
                             </Link>
 
-                        </div>
-
-                        {/* Mobile menu button */}
-                        <div className="-mr-2 flex items-center md:hidden">
+                            {/* Mobile menu button */}
                             <button
-                                onClick={() => setShowingNavigationDropdown((previousState) => !previousState)}
-                                className="inline-flex items-center justify-center rounded-md p-2 text-deep-space-blue-400 transition duration-150 ease-in-out hover:bg-deep-space-blue-500/5 hover:text-deep-space-blue-500 focus:bg-deep-space-blue-500/5 focus:text-deep-space-blue-500 focus:outline-none"
+                                onClick={() => setShowingNavigationDropdown((prev) => !prev)}
+                                className="flex md:hidden items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200"
                             >
-                                <svg className="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                                    <path
-                                        className={!showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={showingNavigationDropdown ? 'inline-flex' : 'hidden'}
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
+                                {showingNavigationDropdown ? (
+                                    <X className="h-6 w-6" />
+                                ) : (
+                                    <Menu className="h-6 w-6" />
+                                )}
                             </button>
                         </div>
                     </header>
 
                     {/* Mobile Navigation */}
-                    <div className={(showingNavigationDropdown ? 'block' : 'hidden') + ' md:hidden bg-slate-50'}>
-                        <div className="space-y-1 pb-3 pt-2 border-b border-deep-space-blue-500/20">
+                    <div className={`${showingNavigationDropdown ? 'block' : 'hidden'} md:hidden bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 rounded-b-xl shadow-lg`}>
+                        <div className="py-2 px-2">
                             <Link
                                 href={route('dashboard')}
-                                className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('dashboard')
-                                    ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                    : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('dashboard')
+                                    ? 'bg-vivid-tangerine-500 text-white'
+                                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                     }`}
                             >
                                 Dashboard
@@ -177,18 +187,18 @@ export default function Authenticated({ header, children }) {
                                 <>
                                     <Link
                                         href={route('diets.index')}
-                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('diets.*')
-                                            ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                            : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                        className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('diets.*')
+                                            ? 'bg-vivid-tangerine-500 text-white'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         Dietas
                                     </Link>
                                     <Link
                                         href={route('foods.index')}
-                                        className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('foods.*')
-                                            ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                            : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                        className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('foods.*')
+                                            ? 'bg-vivid-tangerine-500 text-white'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                             }`}
                                     >
                                         Alimentos
@@ -198,24 +208,79 @@ export default function Authenticated({ header, children }) {
                             {user.role_id === 1 && (
                                 <Link
                                     href={route('my-diet.index')}
-                                    className={`block pl-3 pr-4 py-2 text-base font-bold transition-colors ${route().current('my-diet.*')
-                                        ? 'border-l-4 border-vivid-tangerine-500 text-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                        : 'text-deep-space-blue-400 hover:bg-deep-space-blue-500/5 hover:text-vivid-tangerine-500'
+                                    className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('my-diet.*')
+                                        ? 'bg-vivid-tangerine-500 text-white'
+                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     Minha Dieta
                                 </Link>
                             )}
+                            {user.role_id === 3 && (
+                                <Link
+                                    href={route('users.index')}
+                                    className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('users.*')
+                                        ? 'bg-vivid-tangerine-500 text-white'
+                                        : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                        }`}
+                                >
+                                    Usuários
+                                </Link>
+                            )}
+
+                            <div className="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+
+                            {/* Mobile Profile */}
+                            <Link
+                                href={route('profile.edit')}
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all duration-200"
+                            >
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-600 dark:to-slate-700 text-slate-600 dark:text-slate-200 font-semibold text-sm">
+                                    {user.name.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="text-sm font-medium">{user.name}</span>
+                            </Link>
+
+                            {/* Mobile Logout */}
+                            <Link
+                                href={route('logout')}
+                                method="post"
+                                as="button"
+                                className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-500/10 transition-all duration-200 w-full"
+                            >
+                                <svg
+                                    className="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                                    />
+                                </svg>
+                                <span className="text-sm font-medium">Sair</span>
+                            </Link>
                         </div>
                     </div>
 
                     {/* Page Content */}
-                    <main className="flex-1 p-4 md:p-6 lg:p-8">
+                    <main className="flex-1 py-6 md:py-8">
                         {children}
                     </main>
                 </div>
             </div>
             <Toast />
         </div>
+    );
+}
+
+export default function Authenticated({ header, children }) {
+    return (
+        <ThemeProvider>
+            <AuthenticatedContent header={header} children={children} />
+        </ThemeProvider>
     );
 }

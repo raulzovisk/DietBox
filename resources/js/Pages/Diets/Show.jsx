@@ -11,7 +11,6 @@ import { useState } from 'react';
 import axios from 'axios';
 
 export default function Show({ diet, auth, users, foods, measures }) {
-    // ========== STATES ORIGINAIS ==========
     const [selectedDay, setSelectedDay] = useState(0);
     const [selectedMealFood, setSelectedMealFood] = useState(null);
     const [isAlternativesModalOpen, setIsAlternativesModalOpen] = useState(false);
@@ -62,9 +61,6 @@ export default function Show({ diet, auth, users, foods, measures }) {
     };
 
     const openAddFoodModal = (meal) => {
-
-        console.log('🔍 DEBUG - Meal recebida:', meal); // ✅ Debug
-        console.log('🔍 DEBUG - Meal ID:', meal?.id); // ✅ Debug
         setSelectedMealForFood(meal);
         setIsAddFoodModalOpen(true);
     };
@@ -87,7 +83,6 @@ export default function Show({ diet, auth, users, foods, measures }) {
     const assignedUserIds = diet.assignments ? diet.assignments.map(a => a.user_id) : [];
     const availableUsers = users ? users.filter(u => !assignedUserIds.includes(u.id)) : [];
 
-    // Calcular calorias do dia selecionado
     const dayCalories = (mealsByDay[selectedDay] || []).reduce((total, meal) => {
         const mealCalories = (meal.meal_foods || []).reduce((sum, mf) => {
             return sum + (calculateCalories(mf) || 0);
@@ -116,14 +111,12 @@ export default function Show({ diet, auth, users, foods, measures }) {
 
         try {
             const response = await axios.delete(`/diets/${diet.id}/unassign/${assignmentId}`);
-            console.log('Resposta:', response);
             setRemovingAssignmentId(null);
             showSuccess(`${userName} removido com sucesso`, 3000);
             setTimeout(() => {
                 window.location.reload();
             }, 800);
         } catch (err) {
-            console.error('Erro ao remover:', err);
             setRemovingAssignmentId(null);
             if (err.response?.status === 200) {
                 showSuccess(`${userName} removido com sucesso`, 3000);
@@ -145,13 +138,13 @@ export default function Show({ diet, auth, users, foods, measures }) {
                 <div className="flex items-center gap-4">
                     <Link
                         href={route('diets.index')}
-                        className="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors"
+                        className="flex items-center justify-center rounded-lg h-10 w-10 bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"
                     >
                         <ArrowLeft className="h-5 w-5" />
                     </Link>
                     <div className="flex-1">
-                        <h1 className="text-2xl font-bold text-slate-900">{diet.name}</h1>
-                        <p className="text-sm text-slate-500">Criado por: {diet.nutritionist?.name}</p>
+                        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{diet.name}</h1>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Criado por: {diet.nutritionist?.name}</p>
                     </div>
                     {canEdit && (
                         <Link
@@ -166,19 +159,19 @@ export default function Show({ diet, auth, users, foods, measures }) {
 
                 {/* Informações da Dieta */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-medium text-slate-500 mb-1">Descrição</h3>
-                        <p className="text-slate-900">{diet.description || 'Sem descrição'}</p>
+                    <div className="rounded-lg bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Descrição</h3>
+                        <p className="text-slate-900 dark:text-slate-100">{diet.description || 'Sem descrição'}</p>
                     </div>
-                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-medium text-slate-500 mb-1">Meta Calórica</h3>
-                        <p className="text-slate-900">
+                    <div className="rounded-lg bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Meta Calórica</h3>
+                        <p className="text-slate-900 dark:text-slate-100">
                             {diet.target_calories ? `${diet.target_calories} kcal/dia` : 'Não definido'}
                         </p>
                     </div>
-                    <div className="rounded-lg bg-white p-6 shadow-sm border border-slate-200">
-                        <h3 className="text-sm font-medium text-slate-500 mb-1">Período</h3>
-                        <p className="text-slate-900">
+                    <div className="rounded-lg bg-white dark:bg-slate-800 p-6 shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                        <h3 className="text-sm font-medium text-slate-500 dark:text-slate-400 mb-1">Período</h3>
+                        <p className="text-slate-900 dark:text-slate-100">
                             {diet.start_date ? new Date(diet.start_date).toLocaleDateString('pt-BR') : 'N/A'} -{' '}
                             {diet.end_date ? new Date(diet.end_date).toLocaleDateString('pt-BR') : 'Sem data fim'}
                         </p>
@@ -187,15 +180,15 @@ export default function Show({ diet, auth, users, foods, measures }) {
 
                 {/* Seção Usuários Vinculados */}
                 {canEdit && (
-                    <div className="rounded-xl bg-white p-6 shadow-sm border border-deep-space-blue-500/20">
+                    <div className="rounded-xl bg-white dark:bg-slate-800 p-6 shadow-sm border border-deep-space-blue-500/20 dark:border-slate-700 transition-colors">
                         <div className="flex items-center justify-between mb-4">
                             <div className="flex items-center gap-3">
                                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-vivid-tangerine-500/10">
                                     <Users className="h-5 w-5 text-vivid-tangerine-500" />
                                 </div>
                                 <div>
-                                    <h2 className="text-lg font-semibold text-deep-space-blue-500">Usuários Vinculados</h2>
-                                    <p className="text-sm text-deep-space-blue-400">Gerencie quem pode acessar esta dieta</p>
+                                    <h2 className="text-lg font-semibold text-deep-space-blue-500 dark:text-slate-100">Usuários Vinculados</h2>
+                                    <p className="text-sm text-deep-space-blue-400 dark:text-slate-400">Gerencie quem pode acessar esta dieta</p>
                                 </div>
                             </div>
                             <button
@@ -210,14 +203,14 @@ export default function Show({ diet, auth, users, foods, measures }) {
                         <div className="space-y-2">
                             {diet.assignments && diet.assignments.length > 0 ? (
                                 diet.assignments.map((assignment) => (
-                                    <div key={assignment.id} className="flex items-center justify-between p-4 rounded-lg bg-slate-50 border border-slate-200">
+                                    <div key={assignment.id} className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600">
                                         <div className="flex items-center gap-3">
-                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vivid-tangerine-100 text-vivid-tangerine-600 font-semibold">
+                                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-vivid-tangerine-100 dark:bg-vivid-tangerine-500/20 text-vivid-tangerine-600 font-semibold">
                                                 {assignment.user.name.charAt(0).toUpperCase()}
                                             </div>
                                             <div>
-                                                <p className="font-medium text-slate-900">{assignment.user.name}</p>
-                                                <p className="text-sm text-slate-500">{assignment.user.email}</p>
+                                                <p className="font-medium text-slate-900 dark:text-slate-100">{assignment.user.name}</p>
+                                                <p className="text-sm text-slate-500 dark:text-slate-400">{assignment.user.email}</p>
                                             </div>
                                         </div>
                                         <button
@@ -231,8 +224,8 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                     </div>
                                 ))
                             ) : (
-                                <div className="text-center py-8 text-slate-500">
-                                    <Users className="h-12 w-12 mx-auto mb-2 text-slate-300" />
+                                <div className="text-center py-8 text-slate-500 dark:text-slate-400">
+                                    <Users className="h-12 w-12 mx-auto mb-2 text-slate-300 dark:text-slate-600" />
                                     <p>Nenhum usuário vinculado ainda</p>
                                 </div>
                             )}
@@ -241,16 +234,16 @@ export default function Show({ diet, auth, users, foods, measures }) {
                 )}
 
                 {/* Dias da Semana */}
-                <div className="rounded-lg bg-white shadow-sm border border-slate-200">
-                    <div className="border-b border-slate-200 overflow-x-auto">
+                <div className="rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div className="border-b border-slate-200 dark:border-slate-700 overflow-x-auto">
                         <div className="flex">
                             {weekDays.map((day, index) => (
                                 <button
                                     key={index}
                                     onClick={() => setSelectedDay(index)}
                                     className={`flex-1 min-w-[120px] px-4 py-3 text-sm font-medium whitespace-nowrap transition-colors ${selectedDay === index
-                                        ? 'text-vivid-tangerine-600 border-b-2 border-vivid-tangerine-500 bg-vivid-tangerine-50'
-                                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                                        ? 'text-vivid-tangerine-600 border-b-2 border-vivid-tangerine-500 bg-vivid-tangerine-50 dark:bg-vivid-tangerine-500/10'
+                                        : 'text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-50 dark:hover:bg-slate-700'
                                         }`}
                                 >
                                     {day}
@@ -274,17 +267,17 @@ export default function Show({ diet, auth, users, foods, measures }) {
                         )}
 
                         {/* Resumo Calorias */}
-                        <div className="flex items-center justify-between mb-6 p-4 rounded-lg bg-slate-50">
+                        <div className="flex items-center justify-between mb-6 p-4 rounded-lg bg-slate-50 dark:bg-slate-700/50">
                             <div className="flex items-center gap-3">
                                 <Flame className="h-6 w-6 text-vivid-tangerine-500" />
                                 <div>
-                                    <p className="text-sm text-slate-500">Total de calorias do dia</p>
-                                    <p className="text-2xl font-bold text-slate-900">{dayCalories} kcal</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Total de calorias do dia</p>
+                                    <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">{dayCalories} kcal</p>
                                 </div>
                             </div>
                             {diet.target_calories && (
                                 <div className="text-right">
-                                    <p className="text-sm text-slate-500">Meta: {diet.target_calories} kcal</p>
+                                    <p className="text-sm text-slate-500 dark:text-slate-400">Meta: {diet.target_calories} kcal</p>
                                     <p className={dayCalories > diet.target_calories ? 'text-red-600 font-semibold' : 'text-green-600 font-semibold'}>
                                         ({dayCalories - diet.target_calories > 0 ? '+' : ''}{dayCalories - diet.target_calories} kcal)
                                     </p>
@@ -301,24 +294,24 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                     }, 0);
 
                                     return (
-                                        <div key={meal.id} className="rounded-lg border border-slate-200 bg-white overflow-hidden">
-                                            <div className="bg-slate-50 px-4 py-3 border-b border-slate-200">
+                                        <div key={meal.id} className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 overflow-hidden">
+                                            <div className="bg-slate-50 dark:bg-slate-700/50 px-4 py-3 border-b border-slate-200 dark:border-slate-600">
                                                 <div className="flex items-center justify-between">
                                                     <div>
-                                                        <h3 className="font-semibold text-slate-900">{meal.meal_name}</h3>
+                                                        <h3 className="font-semibold text-slate-900 dark:text-slate-100">{meal.meal_name}</h3>
                                                         {meal.suggested_time && (
-                                                            <p className="text-sm text-slate-500">{meal.suggested_time}</p>
+                                                            <p className="text-sm text-slate-500 dark:text-slate-400">{meal.suggested_time}</p>
                                                         )}
                                                     </div>
                                                     <div className="flex items-center gap-4">
                                                         <div className="text-right">
-                                                            <p className="text-xs text-slate-500">Calorias</p>
-                                                            <p className="font-semibold text-slate-900">{mealCalories} kcal</p>
+                                                            <p className="text-xs text-slate-500 dark:text-slate-400">Calorias</p>
+                                                            <p className="font-semibold text-slate-900 dark:text-slate-100">{mealCalories} kcal</p>
                                                         </div>
                                                         {canEdit && (
                                                             <button
                                                                 onClick={() => openAddFoodModal(meal)}
-                                                                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-vivid-tangerine-600 hover:bg-vivid-tangerine-50 rounded-lg transition-colors"
+                                                                className="flex items-center gap-1 px-3 py-1.5 text-sm font-medium text-vivid-tangerine-600 hover:bg-vivid-tangerine-50 dark:hover:bg-vivid-tangerine-500/10 rounded-lg transition-colors"
                                                             >
                                                                 <Plus className="h-4 w-4" />
                                                                 Alimento
@@ -335,15 +328,15 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                                             const foodCalories = calculateCalories(mealFood);
 
                                                             return (
-                                                                <div key={mealFood.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 hover:bg-slate-100 transition-colors">
+                                                                <div key={mealFood.id} className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors">
                                                                     <div className="flex-1">
-                                                                        <p className="font-medium text-slate-900">{mealFood.food.name}</p>
-                                                                        <p className="text-sm text-slate-600">
+                                                                        <p className="font-medium text-slate-900 dark:text-slate-100">{mealFood.food.name}</p>
+                                                                        <p className="text-sm text-slate-600 dark:text-slate-400">
                                                                             {mealFood.quantity} {mealFood.measure?.abbreviation}
                                                                             {foodCalories && <span className="ml-2">🔥 {foodCalories} kcal</span>}
                                                                         </p>
                                                                         {mealFood.preparation_notes && (
-                                                                            <p className="text-xs text-slate-500 mt-1">{mealFood.preparation_notes}</p>
+                                                                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{mealFood.preparation_notes}</p>
                                                                         )}
                                                                     </div>
                                                                     {canEdit && (
@@ -356,7 +349,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                                                             </button>
                                                                             <button
                                                                                 onClick={() => openEditFoodModal(mealFood)}
-                                                                                className="text-deep-space-blue-500 hover:text-deep-space-blue-600 transition-colors"
+                                                                                className="text-deep-space-blue-500 dark:text-slate-300 hover:text-deep-space-blue-600 dark:hover:text-slate-100 transition-colors"
                                                                             >
                                                                                 <Edit className="h-4 w-4" />
                                                                             </button>
@@ -367,7 +360,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                                         })}
                                                     </div>
                                                 ) : (
-                                                    <p className="text-center text-slate-500 py-4">Nenhum alimento nesta refeição</p>
+                                                    <p className="text-center text-slate-500 dark:text-slate-400 py-4">Nenhum alimento nesta refeição</p>
                                                 )}
                                             </div>
                                         </div>
@@ -376,7 +369,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                             </div>
                         ) : (
                             <div className="text-center py-12">
-                                <p className="text-slate-500 mb-4">Nenhuma refeição cadastrada para este dia.</p>
+                                <p className="text-slate-500 dark:text-slate-400 mb-4">Nenhuma refeição cadastrada para este dia.</p>
                                 {canEdit && (
                                     <button
                                         onClick={() => setIsAddMealModalOpen(true)}
@@ -392,23 +385,23 @@ export default function Show({ diet, auth, users, foods, measures }) {
                 </div>
             </div>
 
-            {/* ========== MODAL VINCULAR USUÁRIO ========== */}
+            {/* Modal Vincular Usuário */}
             {isAssignModalOpen && (
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-xl max-w-md w-full">
-                        <div className="flex items-center justify-between p-6 border-b border-slate-200">
-                            <h3 className="text-lg font-semibold text-slate-900">Vincular Usuário à Dieta</h3>
-                            <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+                    <div className="bg-white dark:bg-slate-800 rounded-xl shadow-xl max-w-md w-full border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+                            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Vincular Usuário à Dieta</h3>
+                            <button onClick={() => setIsAssignModalOpen(false)} className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
                                 <X className="h-5 w-5" />
                             </button>
                         </div>
                         <form onSubmit={handleAssignUser} className="p-6 space-y-4">
                             <div>
-                                <label className="block text-sm font-medium text-slate-700 mb-2">Selecione o Usuário</label>
+                                <label className="block text-sm font-medium text-slate-700 dark:text-slate-200 mb-2">Selecione o Usuário</label>
                                 <select
                                     value={data.user_id}
                                     onChange={(e) => setData('user_id', e.target.value)}
-                                    className="w-full rounded-lg border-slate-300 focus:border-vivid-tangerine-500 focus:ring-vivid-tangerine-500"
+                                    className="w-full rounded-lg border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:ring-vivid-tangerine-500"
                                     required
                                 >
                                     <option value="">Escolha um usuário...</option>
@@ -419,7 +412,7 @@ export default function Show({ diet, auth, users, foods, measures }) {
                                 {errors.user_id && <p className="mt-1 text-sm text-red-600">{errors.user_id}</p>}
                             </div>
                             <div className="flex gap-3">
-                                <button type="button" onClick={() => setIsAssignModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors">
+                                <button type="button" onClick={() => setIsAssignModalOpen(false)} className="flex-1 px-4 py-2 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors">
                                     Cancelar
                                 </button>
                                 <button type="submit" disabled={processing} className="flex-1 px-4 py-2 bg-vivid-tangerine-500 text-white rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50">

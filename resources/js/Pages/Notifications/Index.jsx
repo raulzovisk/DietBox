@@ -1,6 +1,6 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Head, Link, router } from '@inertiajs/react';
-import { Bell, Check, CheckCheck, Trash2, X } from 'lucide-react';
+import { Bell, Check, CheckCheck, Trash2, UtensilsCrossed, Pencil, Ban, CircleCheck, PauseCircle, Salad, Settings, Megaphone, Plus } from 'lucide-react';
 
 export default function Index({ notifications }) {
     const handleMarkAsRead = (notificationId) => {
@@ -26,25 +26,26 @@ export default function Index({ notifications }) {
     const unreadCount = notifications.data.filter(n => !n.is_read).length;
 
     const getNotificationIcon = (type) => {
+        const iconClass = "h-6 w-6";
         switch (type) {
             case 'diet_assigned':
-                return '🍽️';
+                return <UtensilsCrossed className={iconClass} />;
             case 'diet_updated':
-                return '✏️';
+                return <Pencil className={iconClass} />;
             case 'diet_removed':
-                return '🚫';
+                return <Ban className={iconClass} />;
             case 'diet_activated':
-                return '✅';
+                return <CircleCheck className={iconClass} />;
             case 'diet_deactivated':
-                return '⏸️';
+                return <PauseCircle className={iconClass} />;
             case 'meal_added':
-                return '🍴';
+                return <Plus className={iconClass} />;
             case 'food_added':
-                return '🥗';
+                return <Salad className={iconClass} />;
             case 'system':
-                return '⚙️';
+                return <Settings className={iconClass} />;
             default:
-                return '📢';
+                return <Megaphone className={iconClass} />;
         }
     };
 
@@ -57,10 +58,10 @@ export default function Index({ notifications }) {
                 {/* Header */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-deep-space-blue-500 text-3xl md:text-4xl font-black leading-tight">
+                        <h1 className="text-deep-space-blue-500 dark:text-slate-100 text-3xl md:text-4xl font-black leading-tight">
                             Notificações
                         </h1>
-                        <p className="text-deep-space-blue-400 text-base font-normal leading-normal mt-1">
+                        <p className="text-deep-space-blue-400 dark:text-slate-400 text-base font-normal leading-normal mt-1">
                             {unreadCount > 0
                                 ? `Você tem ${unreadCount} notificação${unreadCount > 1 ? 'ões' : ''} não lida${unreadCount > 1 ? 's' : ''}`
                                 : 'Todas as notificações foram lidas'}
@@ -79,12 +80,12 @@ export default function Index({ notifications }) {
 
                 {/* Lista de Notificações */}
                 {notifications.data.length === 0 ? (
-                    <div className="rounded-xl bg-white p-12 shadow-sm border border-deep-space-blue-500/20 text-center">
-                        <Bell className="mx-auto mb-4 h-16 w-16 text-deep-space-blue-300" />
-                        <h3 className="mb-2 text-lg font-semibold text-deep-space-blue-500">
+                    <div className="rounded-xl bg-white dark:bg-slate-800 p-12 shadow-sm border border-deep-space-blue-500/20 dark:border-slate-700 text-center transition-colors">
+                        <Bell className="mx-auto mb-4 h-16 w-16 text-deep-space-blue-300 dark:text-slate-500" />
+                        <h3 className="mb-2 text-lg font-semibold text-deep-space-blue-500 dark:text-slate-100">
                             Nenhuma notificação
                         </h3>
-                        <p className="text-deep-space-blue-400">
+                        <p className="text-deep-space-blue-400 dark:text-slate-400">
                             Você não possui notificações no momento.
                         </p>
                     </div>
@@ -94,16 +95,16 @@ export default function Index({ notifications }) {
                             <div
                                 key={notification.id}
                                 className={`rounded-xl overflow-hidden shadow-sm transition-all ${notification.is_read
-                                        ? 'bg-white border border-slate-200'
-                                        : 'bg-vivid-tangerine-50 border-2 border-vivid-tangerine-500'
+                                    ? 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700'
+                                    : 'bg-vivid-tangerine-50 dark:bg-vivid-tangerine-500/10 border-2 border-vivid-tangerine-500'
                                     }`}
                             >
                                 <div className="p-6">
                                     <div className="flex items-start gap-4">
                                         {/* Ícone */}
-                                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg text-2xl ${notification.is_read
-                                                ? 'bg-slate-100'
-                                                : 'bg-vivid-tangerine-100'
+                                        <div className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg ${notification.is_read
+                                            ? 'bg-slate-100 dark:bg-slate-700 text-deep-space-blue-400 dark:text-slate-400'
+                                            : 'bg-vivid-tangerine-100 dark:bg-vivid-tangerine-500/20 text-vivid-tangerine-600'
                                             }`}>
                                             {getNotificationIcon(notification.type)}
                                         </div>
@@ -112,7 +113,7 @@ export default function Index({ notifications }) {
                                         <div className="flex-1 min-w-0">
                                             <div className="flex items-start justify-between gap-4 mb-2">
                                                 <div className="flex items-center gap-2 flex-wrap">
-                                                    <span className="text-xs font-medium text-deep-space-blue-400 uppercase tracking-wider">
+                                                    <span className="text-xs font-medium text-deep-space-blue-400 dark:text-slate-400 uppercase tracking-wider">
                                                         {notification.type.replace('_', ' ')}
                                                     </span>
                                                     {!notification.is_read && (
@@ -121,7 +122,7 @@ export default function Index({ notifications }) {
                                                         </span>
                                                     )}
                                                 </div>
-                                                <span className="text-xs text-deep-space-blue-400 whitespace-nowrap">
+                                                <span className="text-xs text-deep-space-blue-400 dark:text-slate-400 whitespace-nowrap">
                                                     {new Date(notification.created_at).toLocaleString('pt-BR', {
                                                         day: '2-digit',
                                                         month: '2-digit',
@@ -132,7 +133,7 @@ export default function Index({ notifications }) {
                                                 </span>
                                             </div>
 
-                                            <p className="text-slate-800 mb-3 leading-relaxed">
+                                            <p className="text-slate-800 dark:text-slate-200 mb-3 leading-relaxed">
                                                 {notification.message}
                                             </p>
 
@@ -150,7 +151,7 @@ export default function Index({ notifications }) {
                                                 {!notification.is_read && (
                                                     <button
                                                         onClick={() => handleMarkAsRead(notification.id)}
-                                                        className="text-sm font-medium text-deep-space-blue-500 hover:text-deep-space-blue-600 flex items-center gap-1"
+                                                        className="text-sm font-medium text-deep-space-blue-500 dark:text-slate-300 hover:text-deep-space-blue-600 dark:hover:text-slate-100 flex items-center gap-1"
                                                         title="Marcar como lida"
                                                     >
                                                         <Check className="h-4 w-4" />
@@ -184,10 +185,10 @@ export default function Index({ notifications }) {
                                 href={link.url || '#'}
                                 preserveScroll
                                 className={`rounded-lg px-4 py-2 text-sm font-medium transition-colors ${link.active
-                                        ? 'bg-vivid-tangerine-500 text-white'
-                                        : link.url
-                                            ? 'bg-white text-slate-700 hover:bg-slate-50 border border-slate-200'
-                                            : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                                    ? 'bg-vivid-tangerine-500 text-white'
+                                    : link.url
+                                        ? 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700'
+                                        : 'bg-slate-100 dark:bg-slate-700 text-slate-400 dark:text-slate-500 cursor-not-allowed'
                                     }`}
                                 dangerouslySetInnerHTML={{ __html: link.label }}
                             />

@@ -31,7 +31,7 @@ export default function Edit({ food }) {
     return (
         <AuthenticatedLayout
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                <h2 className="text-xl font-semibold leading-tight text-slate-800 dark:text-slate-100">
                     Editar Alimento
                 </h2>
             }
@@ -40,12 +40,12 @@ export default function Edit({ food }) {
 
             <div className="py-12">
                 <div className="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                    <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
+                    <div className="overflow-hidden bg-white dark:bg-slate-800 shadow-sm sm:rounded-lg border border-slate-200 dark:border-slate-700 transition-colors">
                         <form onSubmit={handleSubmit} className="p-6">
                             <div className="space-y-6">
                                 {/* Nome */}
                                 <div>
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="name" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                         Nome do Alimento *
                                     </label>
                                     <input
@@ -53,7 +53,7 @@ export default function Edit({ food }) {
                                         type="text"
                                         value={data.name}
                                         onChange={(e) => setData('name', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                     />
                                     {errors.name && (
                                         <p className="mt-1 text-sm text-red-600">{errors.name}</p>
@@ -62,14 +62,14 @@ export default function Edit({ food }) {
 
                                 {/* Categoria */}
                                 <div>
-                                    <label htmlFor="category" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="category" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                         Categoria
                                     </label>
                                     <select
                                         id="category"
                                         value={data.category}
                                         onChange={(e) => setData('category', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                     >
                                         <option value="">Selecione uma categoria</option>
                                         {categories.map((cat) => (
@@ -82,7 +82,7 @@ export default function Edit({ food }) {
 
                                 {/* Descrição */}
                                 <div>
-                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                                    <label htmlFor="description" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                         Descrição
                                     </label>
                                     <textarea
@@ -90,18 +90,18 @@ export default function Edit({ food }) {
                                         rows="3"
                                         value={data.description}
                                         onChange={(e) => setData('description', e.target.value)}
-                                        className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                        className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                     />
                                 </div>
 
                                 {/* Informações Nutricionais */}
                                 <div>
-                                    <h3 className="mb-4 text-sm font-medium text-gray-700">
+                                    <h3 className="mb-4 text-sm font-medium text-slate-700 dark:text-slate-200">
                                         Informações Nutricionais (por 100g)
                                     </h3>
                                     <div className="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label htmlFor="calories_per_100g" className="block text-sm font-medium text-gray-700">
+                                            <label htmlFor="calories_per_100g" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                                 Calorias (kcal)
                                             </label>
                                             <input
@@ -110,12 +110,12 @@ export default function Edit({ food }) {
                                                 step="0.01"
                                                 value={data.calories_per_100g}
                                                 onChange={(e) => setData('calories_per_100g', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                             />
                                         </div>
 
                                         <div>
-                                            <label htmlFor="protein_per_100g" className="block text-sm font-medium text-gray-700">
+                                            <label htmlFor="protein_per_100g" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                                 Proteínas (g)
                                             </label>
                                             <input
@@ -124,12 +124,12 @@ export default function Edit({ food }) {
                                                 step="0.01"
                                                 value={data.protein_per_100g}
                                                 onChange={(e) => setData('protein_per_100g', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                             />
                                         </div>
 
                                         <div>
-                                            <label htmlFor="carbs_per_100g" className="block text-sm font-medium text-gray-700">
+                                            <label htmlFor="carbs_per_100g" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                                 Carboidratos (g)
                                             </label>
                                             <input
@@ -138,12 +138,12 @@ export default function Edit({ food }) {
                                                 step="0.01"
                                                 value={data.carbs_per_100g}
                                                 onChange={(e) => setData('carbs_per_100g', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                             />
                                         </div>
 
                                         <div>
-                                            <label htmlFor="fat_per_100g" className="block text-sm font-medium text-gray-700">
+                                            <label htmlFor="fat_per_100g" className="block text-sm font-medium text-slate-700 dark:text-slate-200">
                                                 Gorduras (g)
                                             </label>
                                             <input
@@ -152,7 +152,7 @@ export default function Edit({ food }) {
                                                 step="0.01"
                                                 value={data.fat_per_100g}
                                                 onChange={(e) => setData('fat_per_100g', e.target.value)}
-                                                className="mt-1 block w-full rounded-md border border-gray-300 px-4 py-2 focus:border-amber-500 focus:outline-none focus:ring-2 focus:ring-amber-500"
+                                                className="mt-1 block w-full rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-slate-900 dark:text-slate-100 focus:border-vivid-tangerine-500 focus:outline-none focus:ring-2 focus:ring-vivid-tangerine-500"
                                             />
                                         </div>
                                     </div>
@@ -162,14 +162,14 @@ export default function Edit({ food }) {
                                 <div className="flex items-center justify-end gap-4">
                                     <Link
                                         href="/foods"
-                                        className="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                                        className="rounded-md border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
                                     >
                                         Cancelar
                                     </Link>
                                     <button
                                         type="submit"
                                         disabled={processing}
-                                        className="rounded-md bg-amber-600 px-4 py-2 text-sm font-semibold text-white hover:bg-amber-500 disabled:opacity-50 transition-colors"
+                                        className="rounded-md bg-vivid-tangerine-500 px-4 py-2 text-sm font-semibold text-white hover:opacity-90 disabled:opacity-50 transition-colors"
                                     >
                                         {processing ? 'Salvando...' : 'Atualizar'}
                                     </button>

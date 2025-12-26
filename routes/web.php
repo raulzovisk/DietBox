@@ -7,6 +7,7 @@ use App\Http\Controllers\FoodController;
 use App\Http\Controllers\MealFoodController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserDietViewController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -39,12 +40,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Notificações
-   Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
-    Route::get('/', [NotificationController::class, 'index'])->name('index');
-    Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
-    Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-    Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy'); // ✅ CORRIGIDO
-});
+    Route::middleware('auth')->prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+        Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
+        Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy'); // ✅ CORRIGIDO
+    });
 
 
     Route::delete('/meal-foods/{mealFood}', [MealFoodController::class, 'destroy'])->name('meal-foods.destroy');
@@ -79,6 +80,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Gerenciamento de alimentos
         Route::resource('foods', FoodController::class);
+    });
+
+    // Gerenciamento de usuários (Apenas Admins)
+    Route::middleware('role:admin')->group(function () {
+        Route::resource('users', UserController::class)->only(['index', 'edit', 'update', 'destroy']);
+        Route::post('/users/{user}/restore', [UserController::class, 'restore'])->name('users.restore')->withTrashed();
     });
 });
 
