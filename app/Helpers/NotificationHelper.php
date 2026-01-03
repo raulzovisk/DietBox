@@ -110,4 +110,23 @@ class NotificationHelper
             ['diet_id' => $dietId]
         );
     }
+
+    public static function userUpdate(User $user)
+    {
+        if ($user->id === auth()->user()->id) {
+            return self::create(
+                $user,
+                'user_update',
+                "Seus dados foram atualizados com sucesso!",
+                []
+            );
+        } elseif ($user->id !== auth()->user()->id) {
+            return self::create(
+                $user,
+                'user_update',
+                "O usuário " . auth()->user()->name . " atualizou seus dados!",
+                []
+            );
+        }
+    }
 }

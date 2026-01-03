@@ -1,14 +1,63 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, usePage } from '@inertiajs/react';
 import Toast from '@/Components/Toast';
 import { Bell, Sun, Moon, Menu, X } from 'lucide-react';
 import { ThemeProvider, useTheme } from '@/Contexts/ThemeContext';
+import axios from 'axios';
 
 function AuthenticatedContent({ header, children }) {
     const user = usePage().props.auth.user;
     const [showingNavigationDropdown, setShowingNavigationDropdown] = useState(false);
-    const { unreadNotifications } = usePage().props;
+    const { unreadNotifications: initialUnread } = usePage().props;
     const { theme, toggleTheme } = useTheme();
+
+    // Estado para polling de notificações
+    const [unreadCount, setUnreadCount] = useState(initialUnread || 0);
+    const [hasNewNotification, setHasNewNotification] = useState(false);
+    const lastCheckedRef = useRef(new Date().toISOString());
+    const pollIntervalRef = useRef(null);
+
+    // Polling de notificações a cada 30 segundos
+    useEffect(() => {
+        const checkNotifications = async () => {
+            try {
+                const response = await axios.get(route('notifications.unread-count'), {
+                    params: { last_checked: lastCheckedRef.current }
+                });
+
+                const { unread_count, new_notifications, server_time } = response.data;
+
+                // Se houver novas notificações, mostrar indicador
+                if (new_notifications && new_notifications.length > 0) {
+                    setHasNewNotification(true);
+                    // Som ou vibração opcional aqui
+                    setTimeout(() => setHasNewNotification(false), 3000);
+                }
+
+                setUnreadCount(unread_count);
+                lastCheckedRef.current = server_time;
+            } catch (error) {
+                console.error('Erro ao verificar notificações:', error);
+            }
+        };
+
+        // Verificar imediatamente ao montar
+        checkNotifications();
+
+        // Configurar intervalo de 30 segundos
+        pollIntervalRef.current = setInterval(checkNotifications, 10000);
+
+        return () => {
+            if (pollIntervalRef.current) {
+                clearInterval(pollIntervalRef.current);
+            }
+        };
+    }, []);
+
+    // Atualiza contador quando prop inicial muda (após navegação)
+    useEffect(() => {
+        setUnreadCount(initialUnread || 0);
+    }, [initialUnread]);
 
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-900 transition-colors">
@@ -113,12 +162,12 @@ function AuthenticatedContent({ header, children }) {
                             {/* Notifications */}
                             <Link
                                 href={route('notifications.index')}
-                                className="relative flex items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200"
+                                className={`relative flex items-center justify-center h-10 w-10 rounded-lg text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-700 dark:hover:text-slate-200 transition-all duration-200 ${hasNewNotification ? 'animate-pulse' : ''}`}
                             >
-                                <Bell className="h-5 w-5" />
-                                {unreadNotifications > 0 && (
-                                    <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-vivid-tangerine-500 text-xs font-bold text-white shadow-lg">
-                                        {unreadNotifications > 99 ? '99+' : unreadNotifications}
+                                <Bell className={`h-5 w-5 ${hasNewNotification ? 'text-vivid-tangerine-500' : ''}`} />
+                                {unreadCount > 0 && (
+                                    <span className={`absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-vivid-tangerine-500 text-xs font-bold text-white shadow-lg ${hasNewNotification ? 'animate-bounce' : ''}`}>
+                                        {unreadCount > 99 ? '99+' : unreadCount}
                                     </span>
                                 )}
                             </Link>
