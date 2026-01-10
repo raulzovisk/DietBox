@@ -1,8 +1,10 @@
 import { useEffect } from 'react';
 import { Head, Link, useForm } from '@inertiajs/react';
+import { User, Users } from 'lucide-react';
 
-export default function Register() {
+export default function Register({ token, roleType, roleLabel }) {
     const { data, setData, post, processing, errors, reset } = useForm({
+        token: token || '',
         name: '',
         email: '',
         password: '',
@@ -53,26 +55,26 @@ export default function Register() {
                 {/* Main Content */}
                 <main className="flex-grow flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
                     <div className="w-full max-w-md space-y-8">
-                        <div 
+                        <div
                             className="bg-white p-8 sm:p-10 rounded-lg shadow-lg border border-slate-200"
                             style={{
                                 boxShadow: '0 0 30px 5px rgba(249, 115, 22, 0.2)'
                             }}
                         >
                             {/* Icon and Title */}
-                            <div className="flex flex-col items-center mb-8">
+                            <div className="flex flex-col items-center mb-6">
                                 <div className="bg-orange-500 rounded-full p-3 mb-4 inline-flex">
-                                    <svg 
-                                        className="h-8 w-8 text-white" 
-                                        fill="none" 
-                                        viewBox="0 0 24 24" 
+                                    <svg
+                                        className="h-8 w-8 text-white"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
                                         stroke="currentColor"
                                     >
-                                        <path 
-                                            strokeLinecap="round" 
-                                            strokeLinejoin="round" 
-                                            strokeWidth={2} 
-                                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" 
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"
                                         />
                                     </svg>
                                 </div>
@@ -81,12 +83,39 @@ export default function Register() {
                                 </h2>
                             </div>
 
+                            {/* Role Badge */}
+                            {roleLabel && (
+                                <div className="flex justify-center mb-6">
+                                    <span className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-semibold ${roleType === 2
+                                            ? 'bg-purple-100 text-purple-700'
+                                            : 'bg-sky-100 text-sky-700'
+                                        }`}>
+                                        {roleType === 2 ? (
+                                            <Users className="h-4 w-4" />
+                                        ) : (
+                                            <User className="h-4 w-4" />
+                                        )}
+                                        Registrando como {roleLabel}
+                                    </span>
+                                </div>
+                            )}
+
+                            {/* Token Error */}
+                            {errors.token && (
+                                <div className="mb-4 font-medium text-sm text-red-600 text-center bg-red-50 p-3 rounded-lg">
+                                    {errors.token}
+                                </div>
+                            )}
+
                             {/* Form */}
-                            <form onSubmit={submit} className="space-y-6">
+                            <form onSubmit={submit} className="space-y-5">
+                                {/* Hidden Token */}
+                                <input type="hidden" name="token" value={data.token} />
+
                                 {/* Name */}
                                 <div>
-                                    <label 
-                                        htmlFor="name" 
+                                    <label
+                                        htmlFor="name"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         Nome Completo
@@ -101,6 +130,7 @@ export default function Register() {
                                             onChange={(e) => setData('name', e.target.value)}
                                             placeholder="Seu nome completo"
                                             required
+                                            autoFocus
                                             className="appearance-none block w-full px-3 py-2 border border-slate-300 rounded-md shadow-sm placeholder-slate-400 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm bg-white text-slate-900"
                                         />
                                     </div>
@@ -113,8 +143,8 @@ export default function Register() {
 
                                 {/* Email */}
                                 <div>
-                                    <label 
-                                        htmlFor="email" 
+                                    <label
+                                        htmlFor="email"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         E-mail
@@ -141,8 +171,8 @@ export default function Register() {
 
                                 {/* Password */}
                                 <div>
-                                    <label 
-                                        htmlFor="password" 
+                                    <label
+                                        htmlFor="password"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         Senha
@@ -169,8 +199,8 @@ export default function Register() {
 
                                 {/* Password Confirmation */}
                                 <div>
-                                    <label 
-                                        htmlFor="password_confirmation" 
+                                    <label
+                                        htmlFor="password_confirmation"
                                         className="block text-sm font-medium text-slate-700"
                                     >
                                         Confirmar Senha

@@ -118,6 +118,15 @@ function AuthenticatedContent({ header, children }) {
                                     >
                                         Alimentos
                                     </Link>
+                                    <Link
+                                        href={route('invite-tokens.index')}
+                                        className={`px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('invite-tokens.*')
+                                            ? 'bg-vivid-tangerine-500 text-white shadow-md shadow-vivid-tangerine-500/25'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white'
+                                            }`}
+                                    >
+                                        Convites
+                                    </Link>
                                 </>
                             )}
                             {user.role_id === 1 && (
@@ -251,6 +260,15 @@ function AuthenticatedContent({ header, children }) {
                                             }`}
                                     >
                                         Alimentos
+                                    </Link>
+                                    <Link
+                                        href={route('invite-tokens.index')}
+                                        className={`flex items-center px-4 py-3 rounded-lg text-sm font-semibold transition-all duration-200 ${route().current('invite-tokens.*')
+                                            ? 'bg-vivid-tangerine-500 text-white'
+                                            : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700'
+                                            }`}
+                                    >
+                                        Convites
                                     </Link>
                                 </>
                             )}

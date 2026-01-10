@@ -4,6 +4,7 @@ use App\Http\Controllers\DailyMealController;
 use App\Http\Controllers\DietController;
 use App\Http\Controllers\FoodAlternativeController;
 use App\Http\Controllers\FoodController;
+use App\Http\Controllers\InviteTokenController;
 use App\Http\Controllers\MealFoodController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProfileController;
@@ -45,7 +46,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('/unread-count', [NotificationController::class, 'getUnreadCount'])->name('unread-count');
         Route::patch('/{notification}/read', [NotificationController::class, 'markAsRead'])->name('read');
         Route::post('/mark-all-read', [NotificationController::class, 'markAllAsRead'])->name('mark-all-read');
-        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy'); // ✅ CORRIGIDO
+        Route::delete('/{notification}', [NotificationController::class, 'destroy'])->name('destroy');
     });
 
 
@@ -81,6 +82,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         // Gerenciamento de alimentos
         Route::resource('foods', FoodController::class);
+
+        Route::resource('invite-tokens', InviteTokenController::class);
     });
 
     // Gerenciamento de usuários (Apenas Admins)

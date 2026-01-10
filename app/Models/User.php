@@ -71,4 +71,9 @@ class User extends Authenticatable
     {
         return $this->role_id === Role::ADMIN;
     }
+
+    public function inviteToken()
+    {
+        return $this->hasMany(InviteToken::class);
+    }
 }

@@ -12,8 +12,15 @@ use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('guest')->group(function () {
-    Route::get('register', [RegisteredUserController::class, 'create'])
+    // Token-based registration flow
+    Route::get('register', [RegisteredUserController::class, 'showTokenForm'])
         ->name('register');
+
+    Route::post('register/validate-token', [RegisteredUserController::class, 'validateToken'])
+        ->name('register.validate-token');
+
+    Route::get('register/{token}', [RegisteredUserController::class, 'create'])
+        ->name('register.form');
 
     Route::post('register', [RegisteredUserController::class, 'store']);
 
